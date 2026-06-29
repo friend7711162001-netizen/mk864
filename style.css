@@ -393,7 +393,7 @@ body {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr 350px;
+    grid-template-columns: 1fr auto;
     gap: 24px;
 }
 
