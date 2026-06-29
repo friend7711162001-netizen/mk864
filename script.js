@@ -12,18 +12,17 @@ let state = {
     dailyChecklist: [], // 每日房況檢點 (日期相關)
     dailyTasks: [],     // 每日 17 項例行任務狀態 (日期相關)
     deposits: [],       // 訂金紀錄 (全域，以編號或入住日排序)
+    routineTasksList: [ // 例行項目配置 (預設值，同步時由試算表覆蓋)
+        "續住整理", "補樓梯間備品", "通知洗衣廠", "通知清潔人員",
+        "行程船票開立", "傳明日接送機表", "預訂明日早餐", "與客核對接送機",
+        "點錢", "傳明日入住資訊", "KEY訂金", "刷卡機結帳",
+        "開入住小白單", "KEY行程", "大小毛歸位", "KEY洗衣單", "準備床被單"
+    ],
     targetDate: "",     // 當前選定的操作日期 (格式: YYYY-MM-DD)
     currentDepositFilter: 'all', // 訂金篩選狀態
+    currentTodoFilter: 'pending', // 待辦篩選狀態
     isConnected: false  // 是否成功連線到 Google Sheets
 };
-
-// 圖片 1 中的 17 項例行任務清單
-const ROUTINE_TASKS_LIST = [
-    "續住整理", "補樓梯間備品", "通知洗衣廠", "通知清潔人員",
-    "行程船票開立", "傳明日接送機表", "預訂明日早餐", "與客核對接送機",
-    "點錢", "傳明日入住資訊", "KEY訂金", "刷卡機結帳",
-    "開入住小白單", "KEY行程", "大小毛歸位", "KEY洗衣單", "準備床被單"
-];
 
 // 固定房間清單 (依圖片 1 順序)
 const FIXED_ROOMS = ["202", "302", "201", "301"];
@@ -225,6 +224,23 @@ function initEventListeners() {
         if (e.key === "Enter") handleLoginSubmit();
     });
     document.getElementById("btn-logout").addEventListener("click", handleLogout);
+
+    // 9. 待辦篩選事件
+    const todoFilterButtons = document.querySelectorAll("#todo-filters .filter-btn");
+    todoFilterButtons.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            todoFilterButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            state.currentTodoFilter = btn.dataset.filter;
+            renderTodos();
+        });
+    });
+
+    // 10. 新增例行項目事件
+    document.getElementById("btn-add-routine").addEventListener("click", addRoutineTaskItem);
+    document.getElementById("routine-add-input").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") addRoutineTaskItem();
+    });
 }
 
 /**
@@ -276,9 +292,12 @@ async function syncData(showOverlay = false) {
             const serverData = result.data;
             state.todos = serverData.todos || [];
             state.shuttle = serverData.shuttle || [];
-            state.dailyChecklist = serverData.dailyChecklist || [];
-            state.dailyTasks = serverData.dailyTasks || [];
-            state.deposits = serverData.deposits || [];
+            state.dailyChecklist = result.data.dailyChecklist || [];
+            state.dailyTasks = result.data.dailyTasks || [];
+            state.deposits = result.data.deposits || [];
+            if (result.data.routineConfig && result.data.routineConfig.length > 0) {
+                state.routineTasksList = result.data.routineConfig.map(r => r.項目名稱);
+            }
             state.isConnected = true;
 
             // 同步備份到本地
@@ -403,13 +422,20 @@ function renderTodos() {
     const activeTodos = state.todos;
     countBadge.textContent = `${activeTodos.filter(t => t.是否完成 !== "TRUE" && t.是否完成 !== true).length} 項待辦`;
 
-    if (activeTodos.length === 0) {
-        container.innerHTML = `<li class="empty-msg">目前沒有待辦事項，寫點什麼吧！</li>`;
+    let filteredTodos = activeTodos;
+    if (state.currentTodoFilter === "pending") {
+        filteredTodos = activeTodos.filter(t => t.是否完成 !== "TRUE" && t.是否完成 !== true);
+    } else if (state.currentTodoFilter === "completed") {
+        filteredTodos = activeTodos.filter(t => t.是否完成 === "TRUE" || t.是否完成 === true);
+    }
+
+    if (filteredTodos.length === 0) {
+        container.innerHTML = `<li class="empty-msg">沒有相符的待辦事項</li>`;
         return;
     }
 
     // 依建立時間排序，舊的在前、新的在後
-    activeTodos.sort((a, b) => new Date(a.建立時間) - new Date(b.建立時間));
+    filteredTodos.sort((a, b) => new Date(a.建立時間) - new Date(b.建立時間));
 
     activeTodos.forEach(todo => {
         const li = document.createElement("li");
@@ -454,6 +480,19 @@ function renderRoomTable() {
     const tbody = document.getElementById("room-table-body");
     tbody.innerHTML = "";
 
+    // 動態搜集並更新「未確認的送機旅客姓名」下拉選單
+    const unconfirmedDepartures = (state.shuttle || []).filter(s => 
+        s.類型 === "送機" && 
+        (s.是否確認 !== "TRUE" && s.是否確認 !== true) &&
+        s.姓名
+    );
+    const datalist = document.getElementById("departure-names-list");
+    if (datalist) {
+        datalist.innerHTML = unconfirmedDepartures.map(d => `
+            <option value="${d.姓名}">${d.姓名} (房號: ${d.房號 || '未填'})</option>
+        `).join("");
+    }
+
     // 確保當前日期的 FIXED_ROOMS 都有資料，若無則在前端初始化預設值
     FIXED_ROOMS.forEach(roomNo => {
         let room = state.dailyChecklist.find(r => r.日期 === state.targetDate && r.房號 === roomNo);
@@ -491,7 +530,7 @@ function renderRoomTable() {
             <td style="font-weight: bold; color: var(--color-primary);">${room.房號}</td>
             <td>
                 <input type="text" class="inline-input" style="width: 50px; text-align: center;" 
-                    value="${room.人數 || ""}" placeholder="-" 
+                    value="${room.人數 || ""}" placeholder="-" list="guest-options"
                     onchange="updateRoomField('${room.ID}', '人數', this.value)">
             </td>
             <td>
@@ -512,7 +551,7 @@ function renderRoomTable() {
             </td>
             <td>
                 <input type="text" class="inline-input" style="width: 100px;" 
-                    value="${room.民宿送機 || ""}" placeholder="送機人..." 
+                    value="${room.民宿送機 || ""}" placeholder="送機人..." list="departure-names-list"
                     onchange="updateRoomField('${room.ID}', '民宿送機', this.value)">
             </td>
             <td>
@@ -537,7 +576,7 @@ function renderRoomTable() {
 }
 
 /**
- * 3. 渲染每日 17 項任務核對清單 (支援勾選後自動下移)
+ * 3. 渲染每日例行任務核對清單 (支援勾選後自動下移)
  */
 function renderRoutineTasks() {
     const container = document.getElementById("routine-list-container");
@@ -547,7 +586,7 @@ function renderRoutineTasks() {
     const todayTasks = state.dailyTasks.filter(t => t.日期 === state.targetDate);
     
     // 建立任務資料結構，包含名稱、原始索引與勾選狀態
-    const taskObjects = ROUTINE_TASKS_LIST.map((task, index) => {
+    const taskObjects = state.routineTasksList.map((task, index) => {
         const taskState = todayTasks.find(t => t.任務名稱 === task);
         const isChecked = taskState && (taskState.是否完成 === "TRUE" || taskState.是否完成 === true);
         return {
@@ -601,7 +640,7 @@ function renderRoutineTasks() {
     });
 
     // 更新進度條
-    const progressPercent = ROUTINE_TASKS_LIST.length > 0 ? Math.round((checkedCount / ROUTINE_TASKS_LIST.length) * 100) : 0;
+    const progressPercent = state.routineTasksList.length > 0 ? Math.round((checkedCount / state.routineTasksList.length) * 100) : 0;
     document.getElementById("routine-progress").textContent = `${progressPercent}%`;
     document.getElementById("routine-progress-bar").style.width = `${progressPercent}%`;
 }
@@ -663,7 +702,7 @@ function renderShuttle() {
     if (sortedArrivals.length === 0) {
         const emptyTr = document.createElement("tr");
         emptyTr.className = "empty-row-msg";
-        emptyTr.innerHTML = `<td colspan="12" class="empty-msg">暫無接機行程</td>`;
+        emptyTr.innerHTML = `<td colspan="13" class="empty-msg">暫無接機行程</td>`;
         arrivalTbody.appendChild(emptyTr);
     } else {
         sortedArrivals.forEach(row => {
@@ -678,6 +717,11 @@ function renderShuttle() {
                 <td style="text-align: center;">
                     <input type="checkbox" class="todo-checkbox" ${isChecked ? 'checked' : ''} 
                         onchange="toggleShuttleChecked('${row.ID}', this.checked)">
+                </td>
+                <td>
+                    <input type="number" class="inline-input" style="width: 45px; text-align: center;" 
+                        value="${row.入住天數 || ""}" placeholder="-" min="1"
+                        onchange="updateShuttleField('${row.ID}', '入住天數', this.value)">
                 </td>
                 <td>
                     <input type="text" class="inline-input" style="width: 60px; text-align: center; font-weight: 500;" 
@@ -1080,6 +1124,10 @@ window.saveNewShuttle = function (type) {
     const driverInput = document.getElementById(`add-${prefix}-driver`);
     const remarksInput = document.getElementById(`add-${prefix}-remarks`);
 
+    // 只有接機有入住天數欄位
+    const daysInput = type === "接機" ? document.getElementById("add-arr-days") : null;
+    const daysVal = daysInput ? daysInput.value.trim() : "";
+
     // 房號欄位僅送機有
     const roomInput = type === "送機" ? document.getElementById("add-dep-room") : null;
 
@@ -1109,10 +1157,51 @@ window.saveNewShuttle = function (type) {
         人數: guestsVal || "1",
         司機: driverInput.value.trim(),
         備註: remarksInput.value.trim(),
-        是否確認: "FALSE"
+        是否確認: "FALSE",
+        入住天數: type === "接機" ? daysVal : ""
     };
 
     state.shuttle.push(newShuttle);
+
+    let promises = [executeBackendAction("saveShuttle", { data: newShuttle })];
+
+    // 自動連動邏輯：如果是接機且填寫了入住天數，自動生成一筆送機日程
+    const stayDays = parseInt(daysVal, 10);
+    if (type === "接機" && !isNaN(stayDays) && stayDays > 0) {
+        // 安全地計算送機日期，避免時區偏離
+        const parts = parsedDate.split('-');
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const day = parseInt(parts[2], 10);
+        const depDateObj = new Date(year, month, day + stayDays);
+
+        const depYear = depDateObj.getFullYear();
+        const depMonth = String(depDateObj.getMonth() + 1).padStart(2, '0');
+        const depDay = String(depDateObj.getDate()).padStart(2, '0');
+        const departureDate = `${depYear}-${depMonth}-${depDay}`;
+
+        const depId = "shuttle_" + (Date.now() + 1);
+        const correspondingDeparture = {
+            ID: depId,
+            類型: "送機",
+            日期: departureDate,
+            飯店: "民宿",
+            房號: "",
+            姓名: nameVal,
+            電話: phoneInput.value.trim(),
+            起飛時間: "",
+            送機時間: "",
+            '班次/航班': "",
+            人數: guestsVal || "1",
+            司機: "",
+            備註: "", // 備註保持空白
+            是否確認: "FALSE",
+            入住天數: ""
+        };
+
+        state.shuttle.push(correspondingDeparture);
+        promises.push(executeBackendAction("saveShuttle", { data: correspondingDeparture }));
+    }
 
     // 清空輸入列
     dateInput.value = "";
@@ -1125,11 +1214,12 @@ window.saveNewShuttle = function (type) {
     driverInput.value = "";
     remarksInput.value = "";
     if (roomInput) roomInput.value = "";
+    if (daysInput) daysInput.value = "";
 
     renderShuttle();
     saveLocalData();
 
-    executeBackendAction("saveShuttle", { data: newShuttle }).then(() => {
+    Promise.all(promises).then(() => {
         showToast(`✅ 已新增${type}：${newShuttle.姓名}`);
     });
 };
@@ -1414,5 +1504,42 @@ function handleLogout() {
     if (confirm("確定要登出系統並鎖定網頁嗎？")) {
         localStorage.removeItem("suguanjia_password");
         location.reload(); // 重整網頁會直接進入登入畫面
+    }
+}
+
+/**
+ * 每日例行項目：新增項目並同步到 GAS
+ */
+async function addRoutineTaskItem() {
+    const input = document.getElementById("routine-add-input");
+    if (!input) return;
+    const name = input.value.trim();
+    if (!name) return;
+
+    if (state.routineTasksList.includes(name)) {
+        showToast("⚠️ 項目已存在！");
+        return;
+    }
+
+    // 本地先更新 (Optimistic Update)
+    state.routineTasksList.push(name);
+    renderRoutineTasks();
+    input.value = "";
+
+    showLoading("正在新增例行項目...");
+    try {
+        const result = await executeBackendAction("saveRoutineConfigItem", { name: name });
+        if (result.status === "success") {
+            showToast("✅ 新增例行項目成功");
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (err) {
+        showToast(`❌ 新增失敗: ${err.message}`);
+        // 失敗復原
+        state.routineTasksList = state.routineTasksList.filter(item => item !== name);
+        renderRoutineTasks();
+    } finally {
+        hideLoading();
     }
 }

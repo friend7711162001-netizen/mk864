@@ -52,6 +52,7 @@ function doGet(e) {
     const dailyChecklist = getSheetData(ss.getSheetByName('每日檢點'), true);
     const dailyTasks = getSheetData(ss.getSheetByName('每日任務'), false); // 任務不需要 ID 欄位對應
     const deposits = getSheetData(ss.getSheetByName('訂金表'), false); // 訂金以訂編為主鍵
+    const routineConfig = getSheetData(ss.getSheetByName('例行項目配置'), false);
 
     const result = {
       status: 'success',
@@ -60,7 +61,8 @@ function doGet(e) {
         shuttle: shuttle,
         dailyChecklist: dailyChecklist,
         dailyTasks: dailyTasks,
-        deposits: deposits
+        deposits: deposits,
+        routineConfig: routineConfig
       }
     };
     
@@ -125,6 +127,13 @@ function doPost(e) {
         deleteRow('訂金表', params.id, '訂編');
         break;
         
+      case 'saveRoutineConfigItem':
+        saveRow('例行項目配置', { '項目名稱': params.name }, '項目名稱');
+        break;
+      case 'deleteRoutineConfigItem':
+        deleteRow('例行項目配置', params.name, '項目名稱');
+        break;
+        
       case 'sendShuttleEmail':
         sendShuttleEmail(params.date, params.email || DEFAULT_EMAIL);
         result.message = '郵件發送成功';
@@ -159,7 +168,13 @@ function initSheets() {
   let shuttleSheet = ss.getSheetByName('接送機');
   if (!shuttleSheet) {
     shuttleSheet = ss.insertSheet('接送機');
-    shuttleSheet.appendRow(['ID', '類型', '日期', '飯店', '房號', '姓名', '電話', '起飛時間', '送機時間', '班次/航班', '人數', '備註', '司機', '是否確認']);
+    shuttleSheet.appendRow(['ID', '類型', '日期', '飯店', '房號', '姓名', '電話', '起飛時間', '送機時間', '班次/航班', '人數', '備註', '司機', '是否確認', '入住天數']);
+  } else {
+    // 檢查是否已存在入住天數欄位，若無則補上
+    const headers = shuttleSheet.getDataRange().getValues()[0];
+    if (headers.indexOf('入住天數') === -1) {
+      shuttleSheet.getRange(1, headers.length + 1).setValue('入住天數');
+    }
   }
   
   // 3. 每日檢點 (房況)
@@ -181,6 +196,23 @@ function initSheets() {
   if (!depositSheet) {
     depositSheet = ss.insertSheet('訂金表');
     depositSheet.appendRow(['訂編', '匯款日期', '入住日', '姓名', '金額', '訂/尾', '匯編', '狀態']);
+  }
+
+  // 6. 例行項目配置
+  let routineConfigSheet = ss.getSheetByName('例行項目配置');
+  if (!routineConfigSheet) {
+    routineConfigSheet = ss.insertSheet('例行項目配置');
+    routineConfigSheet.appendRow(['項目名稱']);
+    // 寫入預設的 17 項例行任務
+    const defaultTasks = [
+      "續住整理", "補樓梯間備品", "通知洗衣廠", "通知清潔人員",
+      "行程船票開立", "傳明日接送機表", "預訂明日早餐", "與客核對接送機",
+      "點錢", "傳明日入住資訊", "KEY訂金", "刷卡機結帳",
+      "開入住小白單", "KEY行程", "大小毛歸位", "KEY洗衣單", "準備床被單"
+    ];
+    defaultTasks.forEach(task => {
+      routineConfigSheet.appendRow([task]);
+    });
   }
 }
 

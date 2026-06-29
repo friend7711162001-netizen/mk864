@@ -71,9 +71,14 @@
                                 <h2>📝 待辦清單</h2>
                                 <span class="badge" id="todo-count">0 項待辦</span>
                             </div>
-                            <div class="todo-input-group">
+                            <div class="todo-input-group" style="margin-bottom: 12px;">
                                 <input type="text" id="new-todo-text" placeholder="新增待辦事項，按 Enter 送出...">
                                 <button id="btn-add-todo" class="btn-primary">新增</button>
+                            </div>
+                            <div class="filter-bar" id="todo-filters" style="margin-bottom: 12px;">
+                                <button class="filter-btn" data-filter="all">全部待辦</button>
+                                <button class="filter-btn active" data-filter="pending">⏳ 待處理</button>
+                                <button class="filter-btn" data-filter="completed">✅ 已完成</button>
                             </div>
                             <ul class="todo-list" id="todo-list-container">
                                 <!-- 由 JS 動態生成 -->
@@ -122,6 +127,10 @@
                             <div class="progress-bar-container">
                                 <div class="progress-bar" id="routine-progress-bar" style="width: 0%"></div>
                             </div>
+                            <div class="todo-input-group" style="margin-bottom: 16px;">
+                                <input type="text" id="routine-add-input" placeholder="新增項目，按 Enter 送出...">
+                                <button id="btn-add-routine" class="btn-primary">新增</button>
+                            </div>
                             <div class="routine-grid" id="routine-list-container">
                                 <!-- 17 項例行任務由 JS 動態生成，避免 HTML 冗長 -->
                             </div>
@@ -166,6 +175,7 @@
                                     <thead>
                                         <tr>
                                             <th style="width: 40px; text-align: center;">確認</th>
+                                            <th style="width: 60px; text-align: center;">天數</th>
                                             <th style="width: 80px;">日期</th>
                                             <th style="width: 60px; text-align: center;">飯店</th>
                                             <th>姓名</th>
@@ -183,6 +193,8 @@
                                         <!-- 表格內新增行 -->
                                         <tr class="add-row">
                                             <td></td>
+                                            <td><input type="number" id="add-arr-days" placeholder="天數" min="1"
+                                                    class="inline-input-add" style="text-align: center;"></td>
                                             <td><input type="text" id="add-arr-date" placeholder="6/30"
                                                     class="inline-input-add"></td>
                                             <td><input type="text" id="add-arr-hotel" value="民宿" readonly
@@ -370,6 +382,21 @@
             </div>
         </div>
     </div>
+
+    <!-- 人數與送機旅客下拉預設選單 (Datalists) -->
+    <datalist id="guest-options">
+        <option value="1"></option>
+        <option value="2"></option>
+        <option value="3"></option>
+        <option value="4"></option>
+        <option value="5"></option>
+        <option value="6"></option>
+        <option value="7"></option>
+    </datalist>
+
+    <datalist id="departure-names-list">
+        <!-- 由 JS 動態生成未確認送機姓名 -->
+    </datalist>
 
     <!-- 早餐與時間的下拉式預設選單 (Datalists) -->
     <datalist id="breakfast-options">
