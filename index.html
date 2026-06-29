@@ -1,30 +1,33 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>宿管家 · 民宿營運儀表板</title>
+    <title>媽宮古街10號民宿</title>
     <!-- 引入 Google 字型 -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <!-- 行動裝置圖示設定 -->
     <meta name="theme-color" content="#4A6B5D">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 </head>
+
 <body>
 
     <div class="app-container">
         <!-- 頂部導覽列 -->
         <header class="main-header">
             <div class="logo-area">
-                <span class="logo-icon">🏨</span>
                 <div>
-                    <h1>宿管家</h1>
+                    <h1>媽宮古街10號</h1>
                     <p class="subtitle">民宿營運與接送機管理系統</p>
                 </div>
             </div>
-            
+
             <!-- 控制區：日期選擇與狀態 -->
             <div class="control-panel">
                 <div class="date-selector">
@@ -32,13 +35,14 @@
                     <input type="date" id="target-date" class="date-input">
                     <button id="btn-next-day" class="btn-icon-nav" title="後一天">▶</button>
                 </div>
-                
+
                 <div class="system-status">
                     <span id="sync-indicator" class="status-badge offline">
                         <span class="dot"></span> <span id="status-text">未連線</span>
                     </span>
                     <button id="btn-sync" class="btn-secondary">🔄 同步資料</button>
-                    <button id="btn-logout" class="btn-secondary" style="border-color: var(--color-accent); color: var(--color-accent);">🔓 登出</button>
+                    <button id="btn-logout" class="btn-secondary"
+                        style="border-color: var(--color-accent); color: var(--color-accent);">🔓 登出</button>
                     <button id="btn-init-sheets" class="btn-text-action" title="若試算表為空，可點此初始化工作表">🛠️ 初始化試算表</button>
                 </div>
             </div>
@@ -53,7 +57,7 @@
 
         <!-- 主要內容區域 -->
         <main class="tab-content-container">
-            
+
             <!-- 分頁一：營運總覽 -->
             <section id="tab-overview" class="tab-pane active">
                 <div class="dashboard-grid">
@@ -97,7 +101,9 @@
                                     </thead>
                                     <tbody id="room-table-body">
                                         <!-- 由 JS 動態生成 -->
-                                        <tr><td colspan="9" class="empty-msg">載入中...</td></tr>
+                                        <tr>
+                                            <td colspan="9" class="empty-msg">載入中...</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -175,17 +181,29 @@
                                         <!-- 表格內新增行 -->
                                         <tr class="add-row">
                                             <td></td>
-                                            <td><input type="text" id="add-arr-date" placeholder="6/30" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-arr-hotel" value="民宿" readonly class="inline-input-add text-muted" style="text-align: center;"></td>
-                                            <td><input type="text" id="add-arr-name" placeholder="姓名" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-arr-phone" placeholder="電話" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-arr-flight" placeholder="航班" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-arr-deptime" placeholder="起飛" class="inline-input-add" style="text-align: center;"></td>
-                                            <td><input type="text" id="add-arr-arrtime" placeholder="到達" class="inline-input-add" style="text-align: center;"></td>
-                                            <td><input type="number" id="add-arr-guests" placeholder="人數" class="inline-input-add" style="text-align: center;"></td>
-                                            <td><input type="text" id="add-arr-driver" placeholder="司機" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-arr-remarks" placeholder="備註" class="inline-input-add"></td>
-                                            <td style="text-align: center;"><button id="btn-save-arr" class="btn-primary btn-sm">💾</button></td>
+                                            <td><input type="text" id="add-arr-date" placeholder="6/30"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-hotel" value="民宿" readonly
+                                                    class="inline-input-add text-muted" style="text-align: center;">
+                                            </td>
+                                            <td><input type="text" id="add-arr-name" placeholder="姓名"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-phone" placeholder="電話"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-flight" placeholder="航班"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-deptime" placeholder="起飛"
+                                                    class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-arr-arrtime" placeholder="到達"
+                                                    class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="number" id="add-arr-guests" placeholder="人數"
+                                                    class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-arr-driver" placeholder="司機"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-remarks" placeholder="備註"
+                                                    class="inline-input-add"></td>
+                                            <td style="text-align: center;"><button id="btn-save-arr"
+                                                    class="btn-primary btn-sm">💾</button></td>
                                         </tr>
                                         <!-- 動態行程由 JS 渲染 -->
                                     </tbody>
@@ -221,17 +239,29 @@
                                         <!-- 表格內新增行 -->
                                         <tr class="add-row">
                                             <td></td>
-                                            <td><input type="text" id="add-dep-date" placeholder="6/30" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-dep-hotel" value="民宿" readonly class="inline-input-add text-muted" style="text-align: center;"></td>
-                                            <td><input type="text" id="add-dep-room" placeholder="房號" class="inline-input-add" style="text-align: center;"></td>
-                                            <td><input type="text" id="add-dep-name" placeholder="姓名" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-dep-phone" placeholder="電話" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-dep-deptime" placeholder="起飛" class="inline-input-add" style="text-align: center;"></td>
-                                            <td><input type="text" id="add-dep-arrtime" placeholder="送機時間" class="inline-input-add" style="text-align: center;"></td>
-                                            <td><input type="number" id="add-dep-guests" placeholder="人數" class="inline-input-add" style="text-align: center;"></td>
-                                            <td><input type="text" id="add-dep-driver" placeholder="司機" class="inline-input-add"></td>
-                                            <td><input type="text" id="add-dep-remarks" placeholder="備註" class="inline-input-add"></td>
-                                            <td style="text-align: center;"><button id="btn-save-dep" class="btn-primary btn-sm">💾</button></td>
+                                            <td><input type="text" id="add-dep-date" placeholder="6/30"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-dep-hotel" value="民宿" readonly
+                                                    class="inline-input-add text-muted" style="text-align: center;">
+                                            </td>
+                                            <td><input type="text" id="add-dep-room" placeholder="房號"
+                                                    class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-dep-name" placeholder="姓名"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-dep-phone" placeholder="電話"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-dep-deptime" placeholder="起飛"
+                                                    class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-dep-arrtime" placeholder="送機時間"
+                                                    class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="number" id="add-dep-guests" placeholder="人數"
+                                                    class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-dep-driver" placeholder="司機"
+                                                    class="inline-input-add"></td>
+                                            <td><input type="text" id="add-dep-remarks" placeholder="備註"
+                                                    class="inline-input-add"></td>
+                                            <td style="text-align: center;"><button id="btn-save-dep"
+                                                    class="btn-primary btn-sm">💾</button></td>
                                         </tr>
                                         <!-- 動態行程由 JS 渲染 -->
                                     </tbody>
@@ -278,19 +308,27 @@
                                 <!-- 表格內新增行 -->
                                 <tr class="add-row">
                                     <td></td>
-                                    <td><input type="text" id="add-fin-id" placeholder="訂編" class="inline-input-add" style="text-align: center;"></td>
-                                    <td><input type="text" id="add-fin-remitdate" placeholder="12/09" class="inline-input-add"></td>
-                                    <td><input type="text" id="add-fin-checkindate" placeholder="10/31" class="inline-input-add"></td>
-                                    <td><input type="text" id="add-fin-name" placeholder="姓名" class="inline-input-add"></td>
-                                    <td><input type="number" id="add-fin-amount" placeholder="金額" class="inline-input-add"></td>
+                                    <td><input type="text" id="add-fin-id" placeholder="訂編" class="inline-input-add"
+                                            style="text-align: center;"></td>
+                                    <td><input type="text" id="add-fin-remitdate" placeholder="12/09"
+                                            class="inline-input-add"></td>
+                                    <td><input type="text" id="add-fin-checkindate" placeholder="10/31"
+                                            class="inline-input-add"></td>
+                                    <td><input type="text" id="add-fin-name" placeholder="姓名" class="inline-input-add">
+                                    </td>
+                                    <td><input type="number" id="add-fin-amount" placeholder="金額"
+                                            class="inline-input-add"></td>
                                     <td>
-                                        <select id="add-fin-type" class="inline-input-add" style="text-align: center; padding: 4px;">
+                                        <select id="add-fin-type" class="inline-input-add"
+                                            style="text-align: center; padding: 4px;">
                                             <option value="訂">訂</option>
                                             <option value="尾">尾</option>
                                         </select>
                                     </td>
-                                    <td><input type="text" id="add-fin-code" placeholder="後五碼" class="inline-input-add"></td>
-                                    <td style="text-align: center;"><button id="btn-save-fin" class="btn-primary btn-sm">💾</button></td>
+                                    <td><input type="text" id="add-fin-code" placeholder="後五碼" class="inline-input-add">
+                                    </td>
+                                    <td style="text-align: center;"><button id="btn-save-fin"
+                                            class="btn-primary btn-sm">💾</button></td>
                                 </tr>
                                 <!-- 動態行程由 JS 渲染 -->
                             </tbody>
@@ -356,4 +394,5 @@
     <script src="config.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>

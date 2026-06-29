@@ -329,8 +329,8 @@ function sendShuttleEmail(dateStr, targetEmail) {
   let htmlBody = `
     <div style="font-family: 'Microsoft JhengHei', sans-serif; max-width: 800px; margin: 0 auto; color: #333; padding: 20px; background-color: #F8F6F0; border-radius: 8px;">
       <div style="background-color: #4A6B5D; color: white; padding: 15px 20px; border-radius: 6px 6px 0 0; margin-bottom: 20px;">
-        <h2 style="margin: 0; font-size: 20px; font-weight: normal; letter-spacing: 1px;">🏨 雅霖旅店 / 民宿 接送機每日行程表</h2>
-        <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">日期：${dateStr}</p>
+        <h2 style="margin: 0; font-size: 20px; font-weight: normal; letter-spacing: 1px;">民宿接送機</h2>
+        <p style="margin: 5px 0 0 0; font-size: 20px; opacity: 0.9;">日期：${dateStr}</p>
       </div>
   `;
   
@@ -418,7 +418,7 @@ function sendShuttleEmail(dateStr, targetEmail) {
   
   htmlBody += `
       <div style="margin-top: 30px; border-top: 1px solid #E1E5E0; padding-top: 15px; font-size: 12px; color: #888; text-align: center;">
-        此郵件由【宿管家儀表板系統】自動發送。請勿直接回覆。
+        此郵件由自動發送。請勿直接回覆。
       </div>
     </div>
   `;
@@ -426,7 +426,7 @@ function sendShuttleEmail(dateStr, targetEmail) {
   // 發送電子郵件
   MailApp.sendEmail({
     to: targetEmail,
-    subject: `【接送機行程】${dateStr} 民宿接送機時刻表`,
+    subject: `【民宿接送機】${dateStr} `,
     htmlBody: htmlBody
   });
 }

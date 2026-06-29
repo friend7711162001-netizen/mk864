@@ -95,15 +95,15 @@ body {
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
-    padding-bottom: 15px;
+    gap: 12px;
+    padding-bottom: 10px;
     
     /* 固定在最上方 */
     position: sticky;
     top: 0;
     z-index: 100;
     background-color: var(--bg-primary);
-    padding-top: 24px;
+    padding-top: 16px;
     margin-top: -24px;
     border-bottom: 1px solid var(--color-border);
 }
@@ -123,14 +123,14 @@ body {
 }
 
 .logo-area h1 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     letter-spacing: 0.5px;
     color: var(--color-primary);
 }
 
 .logo-area .subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-muted);
 }
 
@@ -148,17 +148,17 @@ body {
     background: var(--color-white);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    padding: 4px;
+    padding: 2px 4px;
     box-shadow: var(--shadow-sm);
 }
 
 .btn-icon-nav {
     background: none;
     border: none;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--color-primary);
     cursor: pointer;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: var(--radius-sm);
     transition: var(--transition-smooth);
 }
@@ -171,12 +171,12 @@ body {
     border: none;
     background: none;
     font-family: var(--font-sans);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--text-main);
     text-align: center;
     outline: none;
-    padding: 4px 8px;
+    padding: 2px 6px;
     cursor: pointer;
 }
 
@@ -292,9 +292,9 @@ body {
 /* 按鈕樣式 */
 .btn-primary, .btn-secondary, .btn-text-action {
     font-family: var(--font-sans);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    padding: 10px 18px;
+    padding: 8px 14px;
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: var(--transition-smooth);
@@ -358,9 +358,9 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 20px;
     background-color: var(--color-white);
     border: 1px solid var(--color-border);
