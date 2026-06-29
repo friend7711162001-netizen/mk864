@@ -11,5 +11,8 @@ const CONFIG = {
     GAS_URL: "https://script.google.com/macros/s/AKfycbyr20rm82wDeSIZ-F1heSSiWXmsOc8_zUV1gshZbuhKCYxwQV4vIX70fEJLNzh3FuRD/exec",
 
     // 預設的接送機表收件信箱
-    DEFAULT_EMAIL: "service@yaling-hotel.tw"
+    DEFAULT_EMAIL: "service@yaling-hotel.tw",
+    
+    // 系統登入密碼
+    LOGIN_PASSWORD: "496527"
 };

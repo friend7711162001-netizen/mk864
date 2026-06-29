@@ -38,6 +38,7 @@
                         <span class="dot"></span> <span id="status-text">未連線</span>
                     </span>
                     <button id="btn-sync" class="btn-secondary">🔄 同步資料</button>
+                    <button id="btn-logout" class="btn-secondary" style="border-color: var(--color-accent); color: var(--color-accent);">🔓 登出</button>
                     <button id="btn-init-sheets" class="btn-text-action" title="若試算表為空，可點此初始化工作表">🛠️ 初始化試算表</button>
                 </div>
             </div>
@@ -313,6 +314,20 @@
         <div class="spinner-wrapper">
             <div class="spinner"></div>
             <p id="loading-text">正在與 Google 試算表連線中...</p>
+        </div>
+    </div>
+
+    <!-- 登入遮罩 -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-card">
+            <span class="login-logo">🏨</span>
+            <h2>宿管家 · 安全登入</h2>
+            <p class="login-subtitle">請輸入密碼以存取民宿管理系統</p>
+            <div class="login-form-group">
+                <input type="password" id="login-password-input" placeholder="請輸入密碼..." autofocus>
+                <p id="login-error-msg" class="login-error hidden">⚠️ 密碼錯誤，請重新輸入</p>
+                <button id="btn-submit-login" class="btn-primary" style="width: 100%; margin-top: 15px;">確認登入</button>
+            </div>
         </div>
     </div>
 

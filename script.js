@@ -33,10 +33,9 @@ document.addEventListener("DOMContentLoaded", () => {
     initDate();
     initEmailSetting();
     initEventListeners();
-    initRoutineTasksUI();
 
-    // 首次讀取資料
-    syncData();
+    // 檢查並初始化登入狀態
+    checkLoginState();
 });
 
 /**
@@ -194,6 +193,7 @@ function initEventListeners() {
                 document.getElementById("shuttle-departure").classList.add("hidden");
             } else {
                 document.getElementById("shuttle-arrival").classList.add("hidden");
+                document.getElementById("shuttle-departure").classList.add("hidden");
                 document.getElementById("shuttle-departure").classList.remove("hidden");
             }
         });
@@ -201,7 +201,7 @@ function initEventListeners() {
 
     // 7. 訂金表格內直接新增儲存 (Inline Add)
     document.getElementById("btn-save-fin").addEventListener("click", saveNewDeposit);
-
+    
     // 讓新增列的輸入欄位支援按 Enter 直接儲存
     document.querySelectorAll("#deposit-table-body .add-row input").forEach(input => {
         input.addEventListener("keypress", (e) => {
@@ -211,13 +211,20 @@ function initEventListeners() {
 
     const filterButtons = document.querySelectorAll("#deposit-filters .filter-btn");
     filterButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", (e) => {
             filterButtons.forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             state.currentDepositFilter = btn.dataset.filter;
             renderDeposits();
         });
     });
+
+    // 8. 登入與登出事件
+    document.getElementById("btn-submit-login").addEventListener("click", handleLoginSubmit);
+    document.getElementById("login-password-input").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") handleLoginSubmit();
+    });
+    document.getElementById("btn-logout").addEventListener("click", handleLogout);
 }
 
 /**
@@ -229,42 +236,6 @@ function adjustDate(days) {
     state.targetDate = formatDateString(currentDate);
     document.getElementById("target-date").value = state.targetDate;
     renderAll();
-}
-
-/**
- * 載入右側 17 項例行任務的 HTML 結構
- */
-function initRoutineTasksUI() {
-    const container = document.getElementById("routine-list-container");
-    container.innerHTML = "";
-
-    ROUTINE_TASKS_LIST.forEach((task, index) => {
-        const div = document.createElement("div");
-        div.className = "routine-item";
-        div.id = `routine-task-${index}`;
-        div.innerHTML = `
-            <input type="checkbox" class="todo-checkbox" id="chk-routine-${index}">
-            <span>${task}</span>
-        `;
-
-        // 點擊卡片任何地方皆可觸發勾選
-        div.addEventListener("click", (e) => {
-            // 避免與 checkbox 本身的 click 重複觸發
-            if (e.target.type !== "checkbox") {
-                const chk = div.querySelector("input[type='checkbox']");
-                chk.checked = !chk.checked;
-                toggleRoutineTask(task, chk.checked);
-            }
-        });
-
-        // 直接點擊 checkbox
-        const chk = div.querySelector("input[type='checkbox']");
-        chk.addEventListener("change", () => {
-            toggleRoutineTask(task, chk.checked);
-        });
-
-        container.appendChild(div);
-    });
 }
 
 // ==========================================================================
@@ -293,8 +264,11 @@ async function syncData(showOverlay = false) {
         return;
     }
 
+     // 2. 從 Google Apps Script API 獲取資料
     try {
-        const response = await fetch(CONFIG.GAS_URL);
+        const savedPassword = localStorage.getItem("suguanjia_password") || "";
+        const urlWithAuth = `${CONFIG.GAS_URL}?password=${encodeURIComponent(savedPassword)}`;
+        const response = await fetch(urlWithAuth);
         if (!response.ok) throw new Error(`HTTP 錯誤，狀態碼：${response.status}`);
 
         const result = await response.json();
@@ -338,12 +312,20 @@ async function executeBackendAction(action, payload) {
         console.log(`[離線模式] 執行 ${action}:`, payload);
         return { status: "success" };
     }
-
+    // 發送 POST 請求至後端
     try {
+        const savedPassword = localStorage.getItem("suguanjia_password") || "";
         const response = await fetch(CONFIG.GAS_URL, {
             method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: action, ...payload })
+            mode: "cors",
+            headers: {
+                "Content-Type": "text/plain" // 解決 GAS CORS 預檢請求限制
+            },
+            body: JSON.stringify({
+                action: action,
+                password: savedPassword, // 夾帶密碼進行後端驗證
+                ...payload
+            })
         });
         const result = await response.json();
         if (result.status !== "success") {
@@ -555,29 +537,67 @@ function renderRoomTable() {
 }
 
 /**
- * 3. 渲染每日 17 項任務核對清單
+ * 3. 渲染每日 17 項任務核對清單 (支援勾選後自動下移)
  */
 function renderRoutineTasks() {
-    // 篩選出當前日期的任務狀態
+    const container = document.getElementById("routine-list-container");
+    if (!container) return;
+    container.innerHTML = "";
+
     const todayTasks = state.dailyTasks.filter(t => t.日期 === state.targetDate);
+    
+    // 建立任務資料結構，包含名稱、原始索引與勾選狀態
+    const taskObjects = ROUTINE_TASKS_LIST.map((task, index) => {
+        const taskState = todayTasks.find(t => t.任務名稱 === task);
+        const isChecked = taskState && (taskState.是否完成 === "TRUE" || taskState.是否完成 === true);
+        return {
+            name: task,
+            originalIndex: index,
+            checked: isChecked
+        };
+    });
+
+    // 排序邏輯：未完成在上方，已完成（勾選）在下方；同狀態下依原始順序排列
+    taskObjects.sort((a, b) => {
+        if (a.checked !== b.checked) {
+            return a.checked ? 1 : -1;
+        }
+        return a.originalIndex - b.originalIndex;
+    });
 
     let checkedCount = 0;
 
-    ROUTINE_TASKS_LIST.forEach((task, index) => {
-        const itemDiv = document.getElementById(`routine-task-${index}`);
-        const chk = itemDiv.querySelector("input[type='checkbox']");
-
-        // 尋找此項任務今日是否已完成
-        const taskState = todayTasks.find(t => t.任務名稱 === task);
-        const isChecked = taskState && (taskState.是否完成 === "TRUE" || taskState.是否完成 === true);
-
-        chk.checked = isChecked;
-        if (isChecked) {
-            itemDiv.className = "routine-item checked";
+    taskObjects.forEach((taskObj) => {
+        const div = document.createElement("div");
+        div.className = `routine-item ${taskObj.checked ? 'checked' : ''}`;
+        div.innerHTML = `
+            <input type="checkbox" class="todo-checkbox" id="chk-routine-${taskObj.originalIndex}" ${taskObj.checked ? 'checked' : ''}>
+            <span>${taskObj.name}</span>
+        `;
+        
+        if (taskObj.checked) {
             checkedCount++;
-        } else {
-            itemDiv.className = "routine-item";
         }
+
+        // 點擊卡片任意地方皆可觸發勾選
+        div.addEventListener("click", (e) => {
+            if (e.target.type !== "checkbox") {
+                const chk = div.querySelector("input[type='checkbox']");
+                if (chk) {
+                    chk.checked = !chk.checked;
+                    toggleRoutineTask(taskObj.name, chk.checked);
+                }
+            }
+        });
+        
+        const chkInput = div.querySelector("input[type='checkbox']");
+        if (chkInput) {
+            chkInput.addEventListener("change", (e) => {
+                toggleRoutineTask(taskObj.name, e.target.checked);
+            });
+        }
+
+        container.appendChild(div);
     });
 
     // 更新進度條
@@ -1336,4 +1356,63 @@ function showLoading(text = "連線中...") {
 
 function hideLoading() {
     document.getElementById("loading-overlay").classList.add("hidden");
+}
+
+// ==========================================================================
+// 登入驗證與鎖定控制 (Security Auth Logic)
+// ==========================================================================
+
+/**
+ * 檢查登入狀態與顯示遮罩
+ */
+function checkLoginState() {
+    const savedPassword = localStorage.getItem("suguanjia_password");
+    const loginOverlay = document.getElementById("login-overlay");
+    
+    if (savedPassword === CONFIG.LOGIN_PASSWORD) {
+        // 已登入：隱藏登入遮罩，並首次同步資料
+        loginOverlay.classList.add("hidden");
+        syncData();
+    } else {
+        // 未登入：顯示登入遮罩，不進行任何 API 呼叫
+        loginOverlay.classList.remove("hidden");
+        
+        // 聚焦在密碼輸入框
+        setTimeout(() => {
+            const pwdInput = document.getElementById("login-password-input");
+            if (pwdInput) pwdInput.focus();
+        }, 150);
+    }
+}
+
+/**
+ * 處理登入確認
+ */
+function handleLoginSubmit() {
+    const passwordInput = document.getElementById("login-password-input");
+    const errorMsg = document.getElementById("login-error-msg");
+    const enteredPassword = passwordInput.value.trim();
+    
+    if (enteredPassword === CONFIG.LOGIN_PASSWORD) {
+        // 密碼正確：儲存至本地並隱藏遮罩
+        localStorage.setItem("suguanjia_password", enteredPassword);
+        errorMsg.classList.add("hidden");
+        passwordInput.value = "";
+        checkLoginState();
+    } else {
+        // 密碼錯誤
+        errorMsg.classList.remove("hidden");
+        passwordInput.value = "";
+        passwordInput.focus();
+    }
+}
+
+/**
+ * 處理登出
+ */
+function handleLogout() {
+    if (confirm("確定要登出系統並鎖定網頁嗎？")) {
+        localStorage.removeItem("suguanjia_password");
+        location.reload(); // 重整網頁會直接進入登入畫面
+    }
 }

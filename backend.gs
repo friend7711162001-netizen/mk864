@@ -14,10 +14,35 @@
 // 預設收件信箱
 const DEFAULT_EMAIL = "service@yaling-hotel.tw";
 
+// 系統登入密碼 (必須與前端 config.js 中的密碼保持一致)
+const LOGIN_PASSWORD = "496527";
+
+/**
+ * 驗證前端傳來的密碼是否正確
+ */
+function checkAuth(e) {
+  let clientPassword = "";
+  if (e && e.parameter && e.parameter.password) {
+    clientPassword = e.parameter.password;
+  } else if (e && e.postData && e.postData.contents) {
+    try {
+      const data = JSON.parse(e.postData.contents);
+      clientPassword = data.password;
+    } catch(err) {}
+  }
+  return clientPassword === LOGIN_PASSWORD;
+}
+
 /**
  * 處理 GET 請求：讀取所有工作表的資料並回傳 JSON
  */
 function doGet(e) {
+  // 驗證存取密碼
+  if (!checkAuth(e)) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: '密碼錯誤，拒絕存取！' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     
@@ -51,6 +76,12 @@ function doGet(e) {
  * 處理 POST 請求：處理新增、修改、刪除與發送郵件等操作
  */
 function doPost(e) {
+  // 驗證存取密碼
+  if (!checkAuth(e)) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: '密碼錯誤，拒絕存取！' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
   try {
     const params = JSON.parse(e.postData.contents);
     const ss = SpreadsheetApp.getActiveSpreadsheet();

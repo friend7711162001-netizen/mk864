@@ -1226,5 +1226,101 @@ body {
     background-color: var(--color-primary-light);
 }
 
+/* ==========================================================================
+   登入遮罩專屬樣式 (Login Overlay)
+   ========================================================================== */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-primary);
+    background-image: radial-gradient(circle at 20% 30%, rgba(74, 107, 93, 0.08) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 70%, rgba(217, 138, 108, 0.06) 0%, transparent 50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* 確保在最上層，甚至蓋過載入中遮罩 */
+    transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.login-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.login-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    animation: slideUp 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.login-logo {
+    font-size: 56px;
+    display: inline-block;
+    margin-bottom: 20px;
+    background-color: var(--bg-primary);
+    padding: 16px;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+}
+
+.login-card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 30px;
+}
+
+.login-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.login-form-group input {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    outline: none;
+    text-align: center;
+    background-color: #FAFAF9;
+    transition: var(--transition-smooth);
+}
+
+.login-form-group input:focus {
+    border-color: var(--color-primary);
+    background-color: var(--color-white);
+    box-shadow: 0 0 0 3px rgba(74, 107, 93, 0.15);
+}
+
+.login-error {
+    font-size: 13px;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+
 
 
