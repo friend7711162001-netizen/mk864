@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>宿管家 · 民宿營運儀表板</title>
+    <!-- 引入 Google 字型 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- 行動裝置圖示設定 -->
+    <meta name="theme-color" content="#4A6B5D">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- 頂部導覽列 -->
+        <header class="main-header">
+            <div class="logo-area">
+                <span class="logo-icon">🏨</span>
+                <div>
+                    <h1>宿管家</h1>
+                    <p class="subtitle">民宿營運與接送機管理系統</p>
+                </div>
+            </div>
+            
+            <!-- 控制區：日期選擇與狀態 -->
+            <div class="control-panel">
+                <div class="date-selector">
+                    <button id="btn-prev-day" class="btn-icon-nav" title="前一天">◀</button>
+                    <input type="date" id="target-date" class="date-input">
+                    <button id="btn-next-day" class="btn-icon-nav" title="後一天">▶</button>
+                </div>
+                
+                <div class="system-status">
+                    <span id="sync-indicator" class="status-badge offline">
+                        <span class="dot"></span> <span id="status-text">未連線</span>
+                    </span>
+                    <button id="btn-sync" class="btn-secondary">🔄 同步資料</button>
+                    <button id="btn-init-sheets" class="btn-text-action" title="若試算表為空，可點此初始化工作表">🛠️ 初始化試算表</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主導覽分頁標籤 (Tabs) -->
+        <nav class="nav-tabs" id="main-nav">
+            <button class="tab-btn active" data-tab="tab-overview">📊 營運總覽</button>
+            <button class="tab-btn" data-tab="tab-shuttle">🚗 接送機管理</button>
+            <button class="tab-btn" data-tab="tab-deposit">💰 訂金與帳務</button>
+        </nav>
+
+        <!-- 主要內容區域 -->
+        <main class="tab-content-container">
+            
+            <!-- 分頁一：營運總覽 -->
+            <section id="tab-overview" class="tab-pane active">
+                <div class="dashboard-grid">
+                    <!-- 左欄：待辦清單 + 每日檢點房況 -->
+                    <div class="dashboard-left">
+                        <!-- 待辦清單卡片 -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>📝 待辦清單</h2>
+                                <span class="badge" id="todo-count">0 項待辦</span>
+                            </div>
+                            <div class="todo-input-group">
+                                <input type="text" id="new-todo-text" placeholder="新增待辦事項，按 Enter 送出...">
+                                <button id="btn-add-todo" class="btn-primary">新增</button>
+                            </div>
+                            <ul class="todo-list" id="todo-list-container">
+                                <!-- 由 JS 動態生成 -->
+                                <li class="empty-msg">載入中...</li>
+                            </ul>
+                        </div>
+
+                        <!-- 每日檢點表 (房號狀態) -->
+                        <div class="card margin-top">
+                            <div class="card-header">
+                                <h2>🛏️ 每日房況檢點表</h2>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="data-table" id="room-table">
+                                    <thead>
+                                        <tr>
+                                            <th>房號</th>
+                                            <th>人數</th>
+                                            <th>明日早餐</th>
+                                            <th>時間</th>
+                                            <th>清/不清</th>
+                                            <th>民宿送機</th>
+                                            <th>續退</th>
+                                            <th style="text-align: center;">確認</th>
+                                            <th>備註</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="room-table-body">
+                                        <!-- 由 JS 動態生成 -->
+                                        <tr><td colspan="9" class="empty-msg">載入中...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右欄：每日 17 項任務核對 -->
+                    <div class="dashboard-right">
+                        <div class="card routine-card">
+                            <div class="card-header">
+                                <h2>📋 每日例行任務檢點</h2>
+                                <span class="badge" id="routine-progress">0%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="routine-progress-bar" style="width: 0%"></div>
+                            </div>
+                            <div class="routine-grid" id="routine-list-container">
+                                <!-- 17 項例行任務由 JS 動態生成，避免 HTML 冗長 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 分頁二：接送機管理 -->
+            <section id="tab-shuttle" class="tab-pane">
+                <div class="card">
+                    <div class="shuttle-toolbar">
+                        <div class="shuttle-info">
+                            <h2>🚗 接送機日程管理</h2>
+                            <p class="text-muted">顯示所有已登錄的接送行程，未確認排在最上方。</p>
+                        </div>
+                        <div class="shuttle-actions">
+                            <div class="email-input-wrapper">
+                                <label for="shuttle-email">收件信箱：</label>
+                                <input type="email" id="shuttle-email" value="" placeholder="請輸入收信地址...">
+                            </div>
+                            <button id="btn-send-email" class="btn-primary">📧 寄送明日接送機表</button>
+                        </div>
+                    </div>
+
+                    <!-- 子頁籤切換選單 -->
+                    <div class="sub-tabs" id="shuttle-sub-tabs">
+                        <button class="sub-tab-btn active" data-subtab="shuttle-arrival">🛬 接機列表</button>
+                        <button class="sub-tab-btn" data-subtab="shuttle-departure">🛫 送機列表</button>
+                    </div>
+
+                    <!-- 接送機列表區 -->
+                    <div class="shuttle-grid">
+                        <!-- 接機表格 -->
+                        <div class="shuttle-column" id="shuttle-arrival">
+                            <div class="column-header arrival-header">
+                                <h3>🛬 接機日程表</h3>
+                                <span class="badge" id="arrival-count">0 筆</span>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px; text-align: center;">確認</th>
+                                            <th style="width: 80px;">日期</th>
+                                            <th style="width: 60px; text-align: center;">飯店</th>
+                                            <th>姓名</th>
+                                            <th>電話</th>
+                                            <th>出發/航班</th>
+                                            <th style="text-align: center;">起飛</th>
+                                            <th style="text-align: center;">到達</th>
+                                            <th style="text-align: center; width: 60px;">人數</th>
+                                            <th>司機</th>
+                                            <th>備註</th>
+                                            <th style="text-align: center; width: 60px;">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="arrival-table-body">
+                                        <!-- 表格內新增行 -->
+                                        <tr class="add-row">
+                                            <td></td>
+                                            <td><input type="text" id="add-arr-date" placeholder="6/30" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-hotel" value="民宿" readonly class="inline-input-add text-muted" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-arr-name" placeholder="姓名" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-phone" placeholder="電話" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-flight" placeholder="航班" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-deptime" placeholder="起飛" class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-arr-arrtime" placeholder="到達" class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="number" id="add-arr-guests" placeholder="人數" class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-arr-driver" placeholder="司機" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-arr-remarks" placeholder="備註" class="inline-input-add"></td>
+                                            <td style="text-align: center;"><button id="btn-save-arr" class="btn-primary btn-sm">💾</button></td>
+                                        </tr>
+                                        <!-- 動態行程由 JS 渲染 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- 送機表格 -->
+                        <div class="shuttle-column hidden" id="shuttle-departure">
+                            <div class="column-header departure-header">
+                                <h3>🛫 送機日程表</h3>
+                                <span class="badge" id="departure-count">0 筆</span>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40px; text-align: center;">確認</th>
+                                            <th style="width: 80px;">日期</th>
+                                            <th style="width: 60px; text-align: center;">飯店</th>
+                                            <th style="width: 60px; text-align: center;">房號</th>
+                                            <th>姓名</th>
+                                            <th>電話</th>
+                                            <th style="text-align: center;">起飛</th>
+                                            <th style="text-align: center;">送機時間</th>
+                                            <th style="text-align: center; width: 60px;">人數</th>
+                                            <th>司機</th>
+                                            <th>備註</th>
+                                            <th style="text-align: center; width: 60px;">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="departure-table-body">
+                                        <!-- 表格內新增行 -->
+                                        <tr class="add-row">
+                                            <td></td>
+                                            <td><input type="text" id="add-dep-date" placeholder="6/30" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-dep-hotel" value="民宿" readonly class="inline-input-add text-muted" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-dep-room" placeholder="房號" class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-dep-name" placeholder="姓名" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-dep-phone" placeholder="電話" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-dep-deptime" placeholder="起飛" class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-dep-arrtime" placeholder="送機時間" class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="number" id="add-dep-guests" placeholder="人數" class="inline-input-add" style="text-align: center;"></td>
+                                            <td><input type="text" id="add-dep-driver" placeholder="司機" class="inline-input-add"></td>
+                                            <td><input type="text" id="add-dep-remarks" placeholder="備註" class="inline-input-add"></td>
+                                            <td style="text-align: center;"><button id="btn-save-dep" class="btn-primary btn-sm">💾</button></td>
+                                        </tr>
+                                        <!-- 動態行程由 JS 渲染 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 分頁三：訂金與帳務 -->
+            <section id="tab-deposit" class="tab-pane">
+                <div class="card">
+                    <div class="deposit-header-row">
+                        <div class="deposit-title-group">
+                            <h2>💰 訂金與帳務管理</h2>
+                            <p class="text-muted">記錄預訂單的訂金與尾款匯款狀態。</p>
+                        </div>
+                    </div>
+
+                    <!-- 訂金狀態篩選按鈕列 -->
+                    <div class="filter-bar" id="deposit-filters">
+                        <button class="filter-btn active" data-filter="all">全部紀錄</button>
+                        <button class="filter-btn" data-filter="待作帳">⏳ 待作帳</button>
+                        <button class="filter-btn" data-filter="已作帳">✅ 已作帳</button>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="data-table" id="deposit-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px; text-align: center;">作帳</th>
+                                    <th style="width: 100px; text-align: center;">訂編</th>
+                                    <th style="width: 110px;">匯款日期</th>
+                                    <th style="width: 110px;">入住日</th>
+                                    <th>姓名</th>
+                                    <th>金額</th>
+                                    <th style="width: 80px; text-align: center;">訂/尾</th>
+                                    <th>匯編 (後五碼)</th>
+                                    <th style="text-align: center; width: 60px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deposit-table-body">
+                                <!-- 表格內新增行 -->
+                                <tr class="add-row">
+                                    <td></td>
+                                    <td><input type="text" id="add-fin-id" placeholder="訂編" class="inline-input-add" style="text-align: center;"></td>
+                                    <td><input type="text" id="add-fin-remitdate" placeholder="12/09" class="inline-input-add"></td>
+                                    <td><input type="text" id="add-fin-checkindate" placeholder="10/31" class="inline-input-add"></td>
+                                    <td><input type="text" id="add-fin-name" placeholder="姓名" class="inline-input-add"></td>
+                                    <td><input type="number" id="add-fin-amount" placeholder="金額" class="inline-input-add"></td>
+                                    <td>
+                                        <select id="add-fin-type" class="inline-input-add" style="text-align: center; padding: 4px;">
+                                            <option value="訂">訂</option>
+                                            <option value="尾">尾</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" id="add-fin-code" placeholder="後五碼" class="inline-input-add"></td>
+                                    <td style="text-align: center;"><button id="btn-save-fin" class="btn-primary btn-sm">💾</button></td>
+                                </tr>
+                                <!-- 動態行程由 JS 渲染 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ================= 彈出式視窗 (Modals) ================= -->
+
+    <!-- 訂金彈窗已移除，改為直接在表格首行新增與直接編輯 -->
+
+    <!-- 提示彈窗 (Toast) -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- 載入中遮罩 -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner-wrapper">
+            <div class="spinner"></div>
+            <p id="loading-text">正在與 Google 試算表連線中...</p>
+        </div>
+    </div>
+
+    <!-- 早餐與時間的下拉式預設選單 (Datalists) -->
+    <datalist id="breakfast-options">
+        <option value="鐘記燒餅"></option>
+        <option value="二信飯糰"></option>
+        <option value="北新橋肉包"></option>
+        <option value="老夫妻古早味"></option>
+        <option value="摩斯漢堡"></option>
+        <option value="雅霖海鮮粥"></option>
+    </datalist>
+
+    <datalist id="time-options">
+        <option value="06:30"></option>
+        <option value="07:00"></option>
+        <option value="07:30"></option>
+        <option value="08:00"></option>
+        <option value="08:30"></option>
+        <option value="09:00"></option>
+        <option value="09:30"></option>
+        <option value="10:00"></option>
+    </datalist>
+
+    <!-- 腳本引入 -->
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
