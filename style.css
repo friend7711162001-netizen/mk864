@@ -111,14 +111,14 @@ body {
 .logo-area {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
 }
 
-.logo-icon {
-    font-size: 36px;
-    background: var(--color-white);
-    padding: 8px;
-    border-radius: var(--radius-md);
+.logo-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
     box-shadow: var(--shadow-sm);
 }
 
