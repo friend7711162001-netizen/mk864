@@ -424,9 +424,9 @@ function sendShuttleEmail(dateStr, targetEmail) {
   `;
   
   // --- 接機表格 ---
-  htmlBody += `<h3 style="color: #4A6B5D; border-left: 4px solid #4A6B5D; padding-left: 10px; margin-top: 25px;">🛬 今日接機清單 (${arrivals.length} 筆)</h3>`;
+  htmlBody += `<h3 style="color: #4A6B5D; border-left: 4px solid #4A6B5D; padding-left: 10px; margin-top: 25px;">🛬 ${dateStr}接機清單 (${arrivals.length} 筆)</h3>`;
   if (arrivals.length === 0) {
-    htmlBody += `<p style="color: #666; font-style: italic; padding: 10px;">今日無接機行程。</p>`;
+    htmlBody += `<p style="color: #666; font-style: italic; padding: 10px;">無接機行程。</p>`;
   } else {
     htmlBody += `
       <div style="overflow-x: auto;">
@@ -440,7 +440,6 @@ function sendShuttleEmail(dateStr, targetEmail) {
               <th style="padding: 10px; border: 1px solid #E1E5E0;">起飛</th>
               <th style="padding: 10px; border: 1px solid #E1E5E0;">到達</th>
               <th style="padding: 10px; border: 1px solid #E1E5E0;">人數</th>
-              <th style="padding: 10px; border: 1px solid #E1E5E0;">司機</th>
               <th style="padding: 10px; border: 1px solid #E1E5E0;">備註</th>
             </tr>
           </thead>
@@ -456,7 +455,6 @@ function sendShuttleEmail(dateStr, targetEmail) {
           <td style="padding: 10px; border: 1px solid #E1E5E0; text-align: center;">${row.起飛時間 || ''}</td>
           <td style="padding: 10px; border: 1px solid #E1E5E0; text-align: center; font-weight: bold; background-color: #FFF5F0; color: #D98A6C;">${row.送機時間 || ''}</td>
           <td style="padding: 10px; border: 1px solid #E1E5E0; text-align: center; font-weight: bold;">${row.人數 || ''}</td>
-          <td style="padding: 10px; border: 1px solid #E1E5E0; font-weight: bold; color: #2E4037;">${row.司機 || ''}</td>
           <td style="padding: 10px; border: 1px solid #E1E5E0; color: #666; font-size: 12px;">${row.備註 || ''}</td>
         </tr>
       `;
@@ -465,9 +463,9 @@ function sendShuttleEmail(dateStr, targetEmail) {
   }
   
   // --- 送機表格 ---
-  htmlBody += `<h3 style="color: #D98A6C; border-left: 4px solid #D98A6C; padding-left: 10px; margin-top: 30px;">🛫 今日送機清單 (${departures.length} 筆)</h3>`;
+  htmlBody += `<h3 style="color: #D98A6C; border-left: 4px solid #D98A6C; padding-left: 10px; margin-top: 30px;">🛫 ${dateStr}送機清單 (${departures.length} 筆)</h3>`;
   if (departures.length === 0) {
-    htmlBody += `<p style="color: #666; font-style: italic; padding: 10px;">今日無送機行程。</p>`;
+    htmlBody += `<p style="color: #666; font-style: italic; padding: 10px;">無送機行程。</p>`;
   } else {
     htmlBody += `
       <div style="overflow-x: auto;">
@@ -481,7 +479,6 @@ function sendShuttleEmail(dateStr, targetEmail) {
               <th style="padding: 10px; border: 1px solid #F2E3DE;">起飛</th>
               <th style="padding: 10px; border: 1px solid #F2E3DE;">送機時間</th>
               <th style="padding: 10px; border: 1px solid #F2E3DE;">人數</th>
-              <th style="padding: 10px; border: 1px solid #F2E3DE;">司機</th>
               <th style="padding: 10px; border: 1px solid #F2E3DE;">備註</th>
             </tr>
           </thead>
@@ -497,7 +494,6 @@ function sendShuttleEmail(dateStr, targetEmail) {
           <td style="padding: 10px; border: 1px solid #F2E3DE; text-align: center;">${row.起飛時間 || ''}</td>
           <td style="padding: 10px; border: 1px solid #F2E3DE; text-align: center; font-weight: bold; background-color: #FFF5F0; color: #D98A6C;">${row.送機時間 || ''}</td>
           <td style="padding: 10px; border: 1px solid #F2E3DE; text-align: center; font-weight: bold;">${row.人數 || ''}</td>
-          <td style="padding: 10px; border: 1px solid #F2E3DE; font-weight: bold; color: #2E4037;">${row.司機 || ''}</td>
           <td style="padding: 10px; border: 1px solid #F2E3DE; color: #666; font-size: 12px;">${row.備註 || ''}</td>
         </tr>
       `;
