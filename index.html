@@ -20,52 +20,54 @@
 <body>
 
     <div class="app-container">
-        <!-- 頂部導覽列 -->
+        <!-- 頂部標題與狀態列 -->
         <header class="main-header">
-            <div class="logo-area">
-                <img src="logo.png" alt="媽宮古街10號" class="logo-img">
-                <div>
-                    <h1>媽宮古街10號</h1>
-                    <p class="subtitle">民宿營運與接送機管理系統</p>
+            <div class="header-main-row">
+                <div class="logo-area">
+                    <img src="logo.png" alt="媽宮古街10號" class="logo-img">
+                    <div>
+                        <h1>媽宮古街10號</h1>
+                        <p class="subtitle">民宿營運與接送機管理系統</p>
+                    </div>
+                </div>
+
+                <!-- 控制區：日期選擇與狀態 -->
+                <div class="control-panel">
+                    <div class="date-selector">
+                        <button id="btn-prev-day" class="btn-icon-nav" title="前一天">◀</button>
+                        <input type="date" id="target-date" class="date-input">
+                        <button id="btn-next-day" class="btn-icon-nav" title="後一天">▶</button>
+                    </div>
+
+                    <div class="system-status">
+                        <span id="sync-indicator" class="status-badge offline">
+                            <span class="dot"></span> <span id="status-text">未連線</span>
+                        </span>
+                        <a href="https://friend7711162001-netizen.github.io/breakfast/" target="_blank"
+                            class="btn-secondary"
+                            style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            🍳 早餐系統
+                        </a>
+                        <a href="https://friend7711162001-netizen.github.io/Roomclearservie/" target="_blank"
+                            class="btn-secondary"
+                            style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            🧹 清房統計
+                        </a>
+                        <button id="btn-sync" class="btn-secondary">🔄 同步資料</button>
+                        <button id="btn-logout" class="btn-secondary"
+                            style="border-color: var(--color-accent); color: var(--color-accent);">🔓 登出</button>
+                        <button id="btn-init-sheets" class="btn-text-action" title="若試算表為空，可點此初始化工作表">🛠️ 初始化試算表</button>
+                    </div>
                 </div>
             </div>
 
-            <!-- 控制區：日期選擇與狀態 -->
-            <div class="control-panel">
-                <div class="date-selector">
-                    <button id="btn-prev-day" class="btn-icon-nav" title="前一天">◀</button>
-                    <input type="date" id="target-date" class="date-input">
-                    <button id="btn-next-day" class="btn-icon-nav" title="後一天">▶</button>
-                </div>
-
-                <div class="system-status">
-                    <span id="sync-indicator" class="status-badge offline">
-                        <span class="dot"></span> <span id="status-text">未連線</span>
-                    </span>
-                    <a href="https://friend7711162001-netizen.github.io/breakfast/" target="_blank"
-                        class="btn-secondary"
-                        style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                        🍳 早餐系統
-                    </a>
-                    <a href="https://friend7711162001-netizen.github.io/Roomclearservie/" target="_blank"
-                        class="btn-secondary"
-                        style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                        🧹 清房統計
-                    </a>
-                    <button id="btn-sync" class="btn-secondary">🔄 同步資料</button>
-                    <button id="btn-logout" class="btn-secondary"
-                        style="border-color: var(--color-accent); color: var(--color-accent);">🔓 登出</button>
-                    <button id="btn-init-sheets" class="btn-text-action" title="若試算表為空，可點此初始化工作表">🛠️ 初始化試算表</button>
-                </div>
-            </div>
+            <!-- 主導覽分頁標籤 (Tabs) -->
+            <nav class="nav-tabs" id="main-nav">
+                <button class="tab-btn active" data-tab="tab-overview">📊 營運總覽</button>
+                <button class="tab-btn" data-tab="tab-shuttle">🚗 接送機管理</button>
+                <button class="tab-btn" data-tab="tab-deposit">💰 訂金與帳務</button>
+            </nav>
         </header>
-
-        <!-- 主導覽分頁標籤 (Tabs) -->
-        <nav class="nav-tabs" id="main-nav">
-            <button class="tab-btn active" data-tab="tab-overview">📊 營運總覽</button>
-            <button class="tab-btn" data-tab="tab-shuttle">🚗 接送機管理</button>
-            <button class="tab-btn" data-tab="tab-deposit">💰 訂金與帳務</button>
-        </nav>
 
         <!-- 主要內容區域 -->
         <main class="tab-content-container">
