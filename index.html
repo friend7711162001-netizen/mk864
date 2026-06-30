@@ -42,10 +42,14 @@
                     <span id="sync-indicator" class="status-badge offline">
                         <span class="dot"></span> <span id="status-text">未連線</span>
                     </span>
-                    <a href="https://friend7711162001-netizen.github.io/breakfast/" target="_blank" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                    <a href="https://friend7711162001-netizen.github.io/breakfast/" target="_blank"
+                        class="btn-secondary"
+                        style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                         🍳 早餐系統
                     </a>
-                    <a href="https://friend7711162001-netizen.github.io/Roomclearservie/" target="_blank" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                    <a href="https://friend7711162001-netizen.github.io/Roomclearservie/" target="_blank"
+                        class="btn-secondary"
+                        style="text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                         🧹 清房統計
                     </a>
                     <button id="btn-sync" class="btn-secondary">🔄 同步資料</button>
@@ -189,7 +193,7 @@
                                             <th style="width: 100px; min-width: 100px;">出發/航班</th>
                                             <th style="width: 90px; min-width: 90px; text-align: center;">起飛</th>
                                             <th style="width: 90px; min-width: 90px; text-align: center;">到達</th>
-                                            <th style="width: 60px; text-align: center;">人數</th>
+                                            <th style="width: 80px; text-align: center;">人數</th>
                                             <th>備註</th>
                                             <th style="text-align: center; width: 60px;">操作</th>
                                         </tr>
@@ -210,7 +214,7 @@
                                             <td><input type="text" id="add-arr-phone" placeholder="電話"
                                                     class="inline-input-add"></td>
                                             <td><input type="text" id="add-arr-flight" placeholder="航班"
-                                                    class="inline-input-add"></td>
+                                                    class="inline-input-add" list="flight-options"></td>
                                             <td><input type="text" id="add-arr-deptime" placeholder="起飛"
                                                     class="inline-input-add" style="text-align: center;"></td>
                                             <td><input type="text" id="add-arr-arrtime" placeholder="到達"
@@ -246,7 +250,7 @@
                                             <th style="width: 130px; min-width: 130px;">電話</th>
                                             <th style="width: 90px; min-width: 90px; text-align: center;">起飛</th>
                                             <th style="width: 100px; min-width: 100px; text-align: center;">送機時間</th>
-                                            <th style="width: 60px; text-align: center;">人數</th>
+                                            <th style="width: 80px; text-align: center;">人數</th>
                                             <th>備註</th>
                                             <th style="text-align: center; width: 60px;">操作</th>
                                         </tr>
@@ -382,6 +386,18 @@
             </div>
         </div>
     </div>
+
+    <!-- 接機航班下拉預設選單 (Datalists) -->
+    <datalist id="flight-options">
+        <option value="立榮台北"></option>
+        <option value="立榮台中"></option>
+        <option value="立榮高雄"></option>
+        <option value="立榮台南"></option>
+        <option value="立榮嘉義"></option>
+        <option value="華信台北"></option>
+        <option value="華信台中"></option>
+        <option value="華信高雄"></option>
+    </datalist>
 
     <!-- 人數與送機旅客下拉預設選單 (Datalists) -->
     <datalist id="guest-options">

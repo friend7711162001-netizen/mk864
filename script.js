@@ -741,7 +741,7 @@ function renderShuttle() {
                 </td>
                 <td>
                     <input type="text" class="inline-input" 
-                        value="${row['班次/航班'] || ""}" placeholder="航班" 
+                        value="${row['班次/航班'] || ""}" placeholder="航班" list="flight-options"
                         onchange="updateShuttleField('${row.ID}', '班次/航班', this.value)">
                 </td>
                 <td>

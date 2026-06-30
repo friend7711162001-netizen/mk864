@@ -265,7 +265,13 @@ function saveRow(sheetName, rowData, keyName) {
   // 組合要寫入的陣列資料
   const newRowValues = headers.map(h => {
     let val = rowData[h];
-    return val === undefined ? "" : val;
+    if (val === undefined) return "";
+    
+    // 如果是字串且以 0 開頭後面全是數字（且長度大於 1），加上單引號前綴以防止 Google 試算表吃掉開頭的 0
+    if (typeof val === 'string' && /^0\d+$/.test(val)) {
+      return "'" + val;
+    }
+    return val;
   });
   
   const keyValue = rowData[keyName];
