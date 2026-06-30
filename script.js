@@ -261,7 +261,7 @@ function adjustDate(days) {
 /**
  * 從 GAS 後端或 LocalStorage 同步資料
  */
-async function syncData(showOverlay = false) {
+async function syncData(showOverlay = false, silent = false) {
     if (showOverlay) showLoading("與雲端試算表同步中...");
 
     // 檢查是否設定了有效的 GAS 網址
@@ -302,7 +302,7 @@ async function syncData(showOverlay = false) {
 
             // 同步備份到本地
             saveLocalData();
-            showToast("✅ 雲端同步成功");
+            if (!silent) showToast("✅ 雲端同步成功");
         } else {
             throw new Error(result.message);
         }
@@ -310,7 +310,7 @@ async function syncData(showOverlay = false) {
         console.error("同步失敗，改用本地備份資料:", err);
         loadLocalData();
         state.isConnected = false;
-        showToast("⚠️ 無法連線至雲端，已載入本地暫存資料");
+        if (!silent) showToast("⚠️ 無法連線至雲端，已載入本地暫存資料");
     } finally {
         updateConnectionUI();
         hideLoading();
@@ -350,6 +350,10 @@ async function executeBackendAction(action, payload) {
         if (result.status !== "success") {
             throw new Error(result.message);
         }
+        
+        // 存檔成功後，自動在背景無感同步最新數據，確保公式/其他裝置變更即時更新
+        syncData(false, true);
+        
         return result;
     } catch (err) {
         console.error(`執行後端操作 ${action} 失敗:`, err);
