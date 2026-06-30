@@ -601,7 +601,8 @@ body {
    ========================================================================== */
 
 .table-wrapper {
-    overflow-x: auto;
+    overflow: auto;
+    max-height: 65vh;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     background-color: var(--color-white);
@@ -621,6 +622,9 @@ body {
 }
 
 .data-table th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     background-color: #F5F6F3;
     font-weight: 600;
     color: var(--text-main);

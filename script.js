@@ -81,6 +81,40 @@ function formatDisplayDate(dateStr) {
 }
 
 /**
+ * 輔助函數：將任何日期格式轉換為 M/D 顯示格式 (如 6/30)
+ */
+function formatToMonthDay(dateStr) {
+    if (!dateStr) return "";
+    const cleanStr = String(dateStr).trim();
+    
+    // 支援 YYYY-MM-DD 或 YYYY/MM/DD
+    const parts = cleanStr.split(/[\/\-]/);
+    if (parts.length === 3) {
+        const p0 = parseInt(parts[0]);
+        if (parts[0].length === 4 || p0 > 12) {
+            return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+        }
+        // 民國年格式，例如 115/06/30
+        if (p0 > 0 && p0 < 200) {
+            return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+        }
+    } else if (parts.length === 2) {
+        return `${parseInt(parts[0])}/${parseInt(parts[1])}`;
+    }
+    
+    if (cleanStr.includes('T')) {
+        const dateOnly = cleanStr.split('T')[0];
+        const subParts = dateOnly.split('-');
+        if (subParts.length === 3) {
+            return `${parseInt(subParts[1])}/${parseInt(subParts[2])}`;
+        }
+    }
+    
+    return cleanStr;
+}
+
+
+/**
  * 初始化日期：預設為今天
  */
 function initDate() {
@@ -973,12 +1007,12 @@ function renderDeposits() {
             </td>
             <td>
                 <input type="text" class="inline-input" style="width: 90px;" 
-                    value="${row.匯款日期 || ""}" placeholder="12/09" 
+                    value="${formatToMonthDay(row.匯款日期)}" placeholder="12/09" 
                     onchange="updateDepositField('${row.訂編}', '匯款日期', this.value)">
             </td>
             <td>
                 <input type="text" class="inline-input" style="width: 90px; font-weight: 600; color: var(--color-primary);" 
-                    value="${row.入住日 || ""}" placeholder="10/31" 
+                    value="${formatToMonthDay(row.入住日)}" placeholder="10/31" 
                     onchange="updateDepositField('${row.訂編}', '入住日', this.value)">
             </td>
             <td>
