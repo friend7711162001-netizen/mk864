@@ -20,6 +20,8 @@ let state = {
     ],
     targetDate: "",     // 當前選定的操作日期 (格式: YYYY-MM-DD)
     currentDepositFilter: 'all', // 訂金篩選狀態
+    depositSortField: 'default', // 訂金排序欄位：'default', '訂編', '入住日'
+    depositSortOrder: 'asc',     // 訂金排序順序：'asc', 'desc'
     currentTodoFilter: 'pending', // 待辦篩選狀態
     isConnected: false  // 是否成功連線到 Google Sheets
 };
@@ -899,10 +901,12 @@ function renderDeposits() {
         emptyTr.className = "empty-row-msg";
         emptyTr.innerHTML = `<td colspan="9" class="empty-msg">無符合篩選條件的訂金紀錄</td>`;
         tbody.appendChild(emptyTr);
+        // 依然要更新表頭 icon
+        updateDepositSortIcons();
         return;
     }
 
-    // 排序邏輯：未作帳在上方（依入住日升序，同日依訂編升序），已作帳在下方（依入住日降序）
+    // 排序邏輯：未作帳在上方，已作帳在下方
     list.sort((a, b) => {
         const aChecked = a.狀態 === "已作帳";
         const bChecked = b.狀態 === "已作帳";
@@ -911,19 +915,43 @@ function renderDeposits() {
             return aChecked ? 1 : -1; // 未作帳排前面
         }
 
-        // 如果都是未作帳：依入住日升序 (日期越早排前面)
-        if (!aChecked) {
-            if (a.入住日 !== b.入住日) {
-                return String(a.入住日 || '').localeCompare(String(b.入住日 || ''));
-            }
-            return String(a.訂編 || '').localeCompare(String(b.訂編 || ''));
-        }
+        const orderMultiplier = state.depositSortOrder === 'desc' ? -1 : 1;
 
-        // 如果都是已作帳：依入住日降序 (日期越新排前面)
-        if (a.入住日 !== b.入住日) {
-            return String(b.入住日 || '').localeCompare(String(a.入住日 || ''));
+        if (state.depositSortField === '訂編') {
+            const valA = String(a.訂編 || '');
+            const valB = String(b.訂編 || '');
+            const numA = parseFloat(valA);
+            const numB = parseFloat(valB);
+            if (!isNaN(numA) && !isNaN(numB)) {
+                return (numA - numB) * orderMultiplier;
+            }
+            return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' }) * orderMultiplier;
+        } else if (state.depositSortField === '入住日') {
+            const valA = String(a.入住日 || '');
+            const valB = String(b.入住日 || '');
+            return valA.localeCompare(valB) * orderMultiplier;
+        } else {
+            // 預設邏輯 (依入住日排序，若同日依訂編排序)
+            if (!aChecked) {
+                // 未作帳：依入住日升序 (日期越早排前面)
+                if (a.入住日 !== b.入住日) {
+                    return String(a.入住日 || '').localeCompare(String(b.入住日 || ''));
+                }
+                const numA = parseFloat(a.訂編);
+                const numB = parseFloat(b.訂編);
+                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return String(a.訂編 || '').localeCompare(String(b.訂編 || ''), undefined, { numeric: true });
+            } else {
+                // 已作帳：依入住日降序 (日期越新排前面)
+                if (a.入住日 !== b.入住日) {
+                    return String(b.入住日 || '').localeCompare(String(a.入住日 || ''));
+                }
+                const numA = parseFloat(a.訂編);
+                const numB = parseFloat(b.訂編);
+                if (!isNaN(numA) && !isNaN(numB)) return numB - numA;
+                return String(b.訂編 || '').localeCompare(String(a.訂編 || ''), undefined, { numeric: true }) * -1;
+            }
         }
-        return String(b.訂編 || '').localeCompare(String(a.訂編 || ''));
     });
 
     list.forEach(row => {
@@ -980,6 +1008,40 @@ function renderDeposits() {
         `;
 
         tbody.appendChild(tr);
+    });
+
+    // 更新表頭排序圖示
+    updateDepositSortIcons();
+}
+
+/**
+ * 訂金表：切換排序欄位與順序
+ */
+window.changeDepositSort = function(field) {
+    if (state.depositSortField === field) {
+        state.depositSortOrder = state.depositSortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        state.depositSortField = field;
+        state.depositSortOrder = 'asc';
+    }
+    renderDeposits();
+};
+
+/**
+ * 訂金表：更新表頭的排序 icon 顯示狀態
+ */
+function updateDepositSortIcons() {
+    const fields = ['訂編', '入住日'];
+    fields.forEach(f => {
+        const el = document.getElementById(`sort-icon-${f}`);
+        if (!el) return;
+        if (state.depositSortField === f) {
+            el.innerText = state.depositSortOrder === 'asc' ? ' ▲' : ' ▼';
+            el.style.opacity = '1';
+        } else {
+            el.innerText = ' ↕';
+            el.style.opacity = '0.5';
+        }
     });
 }
 

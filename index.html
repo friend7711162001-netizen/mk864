@@ -317,9 +317,13 @@
                             <thead>
                                 <tr>
                                     <th style="width: 40px; text-align: center;">作帳</th>
-                                    <th style="width: 100px; text-align: center;">訂編</th>
+                                    <th style="width: 100px; text-align: center; cursor: pointer; user-select: none;" onclick="changeDepositSort('訂編')">
+                                        訂編 <span id="sort-icon-訂編" style="opacity: 0.5; font-size: 11px;">↕</span>
+                                    </th>
                                     <th style="width: 110px;">匯款日期</th>
-                                    <th style="width: 110px;">入住日</th>
+                                    <th style="width: 110px; cursor: pointer; user-select: none;" onclick="changeDepositSort('入住日')">
+                                        入住日 <span id="sort-icon-入住日" style="opacity: 0.5; font-size: 11px;">↕</span>
+                                    </th>
                                     <th>姓名</th>
                                     <th>金額</th>
                                     <th style="width: 80px; text-align: center;">訂/尾</th>
