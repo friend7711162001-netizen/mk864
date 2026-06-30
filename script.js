@@ -702,7 +702,7 @@ function renderShuttle() {
     if (sortedArrivals.length === 0) {
         const emptyTr = document.createElement("tr");
         emptyTr.className = "empty-row-msg";
-        emptyTr.innerHTML = `<td colspan="13" class="empty-msg">暫無接機行程</td>`;
+        emptyTr.innerHTML = `<td colspan="12" class="empty-msg">暫無接機行程</td>`;
         arrivalTbody.appendChild(emptyTr);
     } else {
         sortedArrivals.forEach(row => {
@@ -719,53 +719,48 @@ function renderShuttle() {
                         onchange="toggleShuttleChecked('${row.ID}', this.checked)">
                 </td>
                 <td>
-                    <input type="number" class="inline-input" style="width: 45px; text-align: center;" 
+                    <input type="number" class="inline-input" style="text-align: center;" 
                         value="${row.入住天數 || ""}" placeholder="-" min="1"
                         onchange="updateShuttleField('${row.ID}', '入住天數', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 60px; text-align: center; font-weight: 500;" 
+                    <input type="text" class="inline-input" style="text-align: center; font-weight: 500;" 
                         value="${formatDisplayDate(row.日期)}" placeholder="6/30" 
                         onchange="updateShuttleField('${row.ID}', '日期', this.value)">
                 </td>
                 <td style="text-align: center; color: var(--text-muted); font-size: 13px;">民宿</td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 80px;" 
+                    <input type="text" class="inline-input" 
                         value="${row.姓名 || ""}" placeholder="姓名" 
                         onchange="updateShuttleField('${row.ID}', '姓名', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 110px;" 
+                    <input type="text" class="inline-input" 
                         value="${row.電話 || ""}" placeholder="電話" 
                         onchange="updateShuttleField('${row.ID}', '電話', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 85px;" 
+                    <input type="text" class="inline-input" 
                         value="${row['班次/航班'] || ""}" placeholder="航班" 
                         onchange="updateShuttleField('${row.ID}', '班次/航班', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 60px; text-align: center;" 
+                    <input type="text" class="inline-input" style="text-align: center;" 
                         value="${row.起飛時間 || ""}" placeholder="起飛" 
                         onchange="updateShuttleField('${row.ID}', '起飛時間', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 60px; text-align: center; font-weight: bold; color: var(--color-accent);" 
+                    <input type="text" class="inline-input" style="text-align: center; font-weight: bold; color: var(--color-accent);" 
                         value="${row.送機時間 || ""}" placeholder="到達" 
                         onchange="updateShuttleField('${row.ID}', '送機時間', this.value)">
                 </td>
                 <td>
-                    <input type="number" class="inline-input" style="width: 45px; text-align: center;" 
+                    <input type="number" class="inline-input" style="text-align: center;" 
                         value="${row.人數 || ""}" placeholder="-" 
                         onchange="updateShuttleField('${row.ID}', '人數', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 80px;" 
-                        value="${row.司機 || ""}" placeholder="司機" 
-                        onchange="updateShuttleField('${row.ID}', '司機', this.value)">
-                </td>
-                <td>
-                    <input type="text" class="inline-input" style="width: 100%; min-width: 100px;" 
+                    <input type="text" class="inline-input" style="min-width: 100px;" 
                         value="${row.備註 || ""}" placeholder="備註..." 
                         onchange="updateShuttleField('${row.ID}', '備註', this.value)">
                 </td>
@@ -781,7 +776,7 @@ function renderShuttle() {
     if (sortedDepartures.length === 0) {
         const emptyTr = document.createElement("tr");
         emptyTr.className = "empty-row-msg";
-        emptyTr.innerHTML = `<td colspan="12" class="empty-msg">暫無送機行程</td>`;
+        emptyTr.innerHTML = `<td colspan="11" class="empty-msg">暫無送機行程</td>`;
         departureTbody.appendChild(emptyTr);
     } else {
         sortedDepartures.forEach(row => {
@@ -798,48 +793,43 @@ function renderShuttle() {
                         onchange="toggleShuttleChecked('${row.ID}', this.checked)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 60px; text-align: center; font-weight: 500;" 
+                    <input type="text" class="inline-input" style="text-align: center; font-weight: 500;" 
                         value="${formatDisplayDate(row.日期)}" placeholder="6/30" 
                         onchange="updateShuttleField('${row.ID}', '日期', this.value)">
                 </td>
                 <td style="text-align: center; color: var(--text-muted); font-size: 13px;">民宿</td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 50px; text-align: center;" 
+                    <input type="text" class="inline-input" style="text-align: center;" 
                         value="${row.房號 || ""}" placeholder="房號" 
                         onchange="updateShuttleField('${row.ID}', '房號', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 80px;" 
+                    <input type="text" class="inline-input" 
                         value="${row.姓名 || ""}" placeholder="姓名" 
                         onchange="updateShuttleField('${row.ID}', '姓名', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 110px;" 
+                    <input type="text" class="inline-input" 
                         value="${row.電話 || ""}" placeholder="電話" 
                         onchange="updateShuttleField('${row.ID}', '電話', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 60px; text-align: center;" 
+                    <input type="text" class="inline-input" style="text-align: center;" 
                         value="${row.起飛時間 || ""}" placeholder="起飛" 
                         onchange="updateShuttleField('${row.ID}', '起飛時間', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 60px; text-align: center; font-weight: bold; color: var(--color-accent);" 
+                    <input type="text" class="inline-input" style="text-align: center; font-weight: bold; color: var(--color-accent);" 
                         value="${row.送機時間 || ""}" placeholder="送機" 
                         onchange="updateShuttleField('${row.ID}', '送機時間', this.value)">
                 </td>
                 <td>
-                    <input type="number" class="inline-input" style="width: 45px; text-align: center;" 
+                    <input type="number" class="inline-input" style="text-align: center;" 
                         value="${row.人數 || ""}" placeholder="-" 
                         onchange="updateShuttleField('${row.ID}', '人數', this.value)">
                 </td>
                 <td>
-                    <input type="text" class="inline-input" style="width: 80px;" 
-                        value="${row.司機 || ""}" placeholder="司機" 
-                        onchange="updateShuttleField('${row.ID}', '司機', this.value)">
-                </td>
-                <td>
-                    <input type="text" class="inline-input" style="width: 100%; min-width: 100px;" 
+                    <input type="text" class="inline-input" style="min-width: 100px;" 
                         value="${row.備註 || ""}" placeholder="備註..." 
                         onchange="updateShuttleField('${row.ID}', '備註', this.value)">
                 </td>
@@ -1121,7 +1111,6 @@ window.saveNewShuttle = function (type) {
     const depTimeInput = document.getElementById(`add-${prefix}-deptime`);
     const arrTimeInput = document.getElementById(`add-${prefix}-arrtime`);
     const guestsInput = document.getElementById(`add-${prefix}-guests`);
-    const driverInput = document.getElementById(`add-${prefix}-driver`);
     const remarksInput = document.getElementById(`add-${prefix}-remarks`);
 
     // 只有接機有入住天數欄位
@@ -1155,7 +1144,7 @@ window.saveNewShuttle = function (type) {
         送機時間: arrTimeInput.value.trim(), // 對應到達時間或送機時間
         '班次/航班': flightInput ? flightInput.value.trim() : "",
         人數: guestsVal || "1",
-        司機: driverInput.value.trim(),
+        司機: "",
         備註: remarksInput.value.trim(),
         是否確認: "FALSE",
         入住天數: type === "接機" ? daysVal : ""
@@ -1211,7 +1200,6 @@ window.saveNewShuttle = function (type) {
     depTimeInput.value = "";
     arrTimeInput.value = "";
     guestsInput.value = "";
-    driverInput.value = "";
     remarksInput.value = "";
     if (roomInput) roomInput.value = "";
     if (daysInput) daysInput.value = "";
