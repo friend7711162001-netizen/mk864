@@ -729,7 +729,7 @@ function renderShuttle() {
     if (sortedArrivals.length === 0) {
         const emptyTr = document.createElement("tr");
         emptyTr.className = "empty-row-msg";
-        emptyTr.innerHTML = `<td colspan="12" class="empty-msg">暫無接機行程</td>`;
+        emptyTr.innerHTML = `<td colspan="13" class="empty-msg">暫無接機行程</td>`;
         arrivalTbody.appendChild(emptyTr);
     } else {
         sortedArrivals.forEach(row => {
@@ -780,6 +780,11 @@ function renderShuttle() {
                     <input type="text" class="inline-input" style="text-align: center; font-weight: bold; color: var(--color-accent);" 
                         value="${row.送機時間 || ""}" placeholder="到達" 
                         onchange="updateShuttleField('${row.ID}', '送機時間', this.value)">
+                </td>
+                <td>
+                    <input type="text" class="inline-input" style="text-align: center;" 
+                        value="${row.航班 || ""}" placeholder="航班" 
+                        onchange="updateShuttleField('${row.ID}', '航班', this.value)">
                 </td>
                 <td>
                     <input type="number" class="inline-input" style="text-align: center;" 
@@ -1155,6 +1160,7 @@ window.saveNewShuttle = function (type) {
     const flightInput = document.getElementById(`add-${prefix}-flight`);
     const depTimeInput = document.getElementById(`add-${prefix}-deptime`);
     const arrTimeInput = document.getElementById(`add-${prefix}-arrtime`);
+    const flightNoInput = type === "接機" ? document.getElementById("add-arr-flight-no") : null;
     const guestsInput = document.getElementById(`add-${prefix}-guests`);
     const remarksInput = document.getElementById(`add-${prefix}-remarks`);
 
@@ -1188,6 +1194,7 @@ window.saveNewShuttle = function (type) {
         起飛時間: depTimeInput.value.trim(),
         送機時間: arrTimeInput.value.trim(), // 對應到達時間或送機時間
         '班次/航班': flightInput ? flightInput.value.trim() : "",
+        航班: flightNoInput ? flightNoInput.value.trim() : "",
         人數: guestsVal || "1",
         司機: "",
         備註: remarksInput.value.trim(),
@@ -1242,6 +1249,7 @@ window.saveNewShuttle = function (type) {
     nameInput.value = "";
     phoneInput.value = "";
     if (flightInput) flightInput.value = "";
+    if (flightNoInput) flightNoInput.value = "";
     depTimeInput.value = "";
     arrTimeInput.value = "";
     guestsInput.value = "";

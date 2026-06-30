@@ -168,7 +168,7 @@ function initSheets() {
   let shuttleSheet = ss.getSheetByName('接送機');
   if (!shuttleSheet) {
     shuttleSheet = ss.insertSheet('接送機');
-    shuttleSheet.appendRow(['ID', '類型', '日期', '飯店', '房號', '姓名', '電話', '起飛時間', '送機時間', '班次/航班', '人數', '備註', '司機', '是否確認', '入住天數']);
+    shuttleSheet.appendRow(['ID', '類型', '日期', '飯店', '房號', '姓名', '電話', '起飛時間', '送機時間', '班次/航班', '航班', '人數', '備註', '司機', '是否確認', '入住天數']);
   } else {
     // 檢查是否已存在入住天數欄位，若無則補上
     const headers = shuttleSheet.getDataRange().getValues()[0];
@@ -291,8 +291,21 @@ function saveRow(sheetName, rowData, keyName) {
   const sheet = ss.getSheetByName(sheetName);
   if (!sheet) throw new Error('找不到工作表：' + sheetName);
   
-  const data = sheet.getDataRange().getValues();
-  const headers = data[0];
+  let data = sheet.getDataRange().getValues();
+  let headers = data[0];
+  
+  // 自動更新結構：如果是接送機工作表，且沒有「航班」欄位，自動加上！
+  if (sheetName === '接送機' && headers.indexOf('航班') === -1) {
+    const idx = headers.indexOf('班次/航班');
+    if (idx !== -1) {
+      sheet.insertColumnAfter(idx + 1);
+      sheet.getRange(1, idx + 2).setValue('航班');
+      // 重新讀取最新的 headers 和 data
+      data = sheet.getDataRange().getValues();
+      headers = data[0];
+    }
+  }
+  
   const keyIndex = headers.indexOf(keyName);
   if (keyIndex === -1) throw new Error('在工作表 ' + sheetName + ' 中找不到 Key 欄位：' + keyName);
   
@@ -439,6 +452,7 @@ function sendShuttleEmail(dateStr, targetEmail) {
               <th style="padding: 10px; border: 1px solid #E1E5E0;">出發/航班</th>
               <th style="padding: 10px; border: 1px solid #E1E5E0;">起飛</th>
               <th style="padding: 10px; border: 1px solid #E1E5E0;">到達</th>
+              <th style="padding: 10px; border: 1px solid #E1E5E0;">航班</th>
               <th style="padding: 10px; border: 1px solid #E1E5E0;">人數</th>
               <th style="padding: 10px; border: 1px solid #E1E5E0;">備註</th>
             </tr>
@@ -454,6 +468,7 @@ function sendShuttleEmail(dateStr, targetEmail) {
           <td style="padding: 10px; border: 1px solid #E1E5E0;">${row['班次/航班'] || ''}</td>
           <td style="padding: 10px; border: 1px solid #E1E5E0; text-align: center;">${row.起飛時間 || ''}</td>
           <td style="padding: 10px; border: 1px solid #E1E5E0; text-align: center; font-weight: bold; background-color: #FFF5F0; color: #D98A6C;">${row.送機時間 || ''}</td>
+          <td style="padding: 10px; border: 1px solid #E1E5E0; text-align: center; font-weight: bold;">${row.航班 || ''}</td>
           <td style="padding: 10px; border: 1px solid #E1E5E0; text-align: center; font-weight: bold;">${row.人數 || ''}</td>
           <td style="padding: 10px; border: 1px solid #E1E5E0; color: #666; font-size: 12px;">${row.備註 || ''}</td>
         </tr>
