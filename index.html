@@ -71,29 +71,8 @@
                 <div class="dashboard-grid">
                     <!-- 左欄：待辦清單 + 每日檢點房況 -->
                     <div class="dashboard-left">
-                        <!-- 待辦清單卡片 -->
+                        <!-- 每日房況檢點表 (房號狀態) -->
                         <div class="card">
-                            <div class="card-header">
-                                <h2>📝 待辦清單</h2>
-                                <span class="badge" id="todo-count">0 項待辦</span>
-                            </div>
-                            <div class="todo-input-group" style="margin-bottom: 12px;">
-                                <input type="text" id="new-todo-text" placeholder="新增待辦事項，按 Enter 送出...">
-                                <button id="btn-add-todo" class="btn-primary">新增</button>
-                            </div>
-                            <div class="filter-bar" id="todo-filters" style="margin-bottom: 12px;">
-                                <button class="filter-btn" data-filter="all">全部待辦</button>
-                                <button class="filter-btn active" data-filter="pending">⏳ 待處理</button>
-                                <button class="filter-btn" data-filter="completed">✅ 已完成</button>
-                            </div>
-                            <ul class="todo-list" id="todo-list-container">
-                                <!-- 由 JS 動態生成 -->
-                                <li class="empty-msg">載入中...</li>
-                            </ul>
-                        </div>
-
-                        <!-- 每日檢點表 (房號狀態) -->
-                        <div class="card margin-top">
                             <div class="card-header">
                                 <h2>🛏️ 每日房況檢點表</h2>
                             </div>
@@ -120,6 +99,27 @@
                                     </tbody>
                                 </table>
                             </div>
+                        </div>
+
+                        <!-- 待辦清單卡片 -->
+                        <div class="card margin-top">
+                            <div class="card-header">
+                                <h2>📝 待辦清單</h2>
+                                <span class="badge" id="todo-count">0 項待辦</span>
+                            </div>
+                            <div class="todo-input-group" style="margin-bottom: 12px;">
+                                <input type="text" id="new-todo-text" placeholder="新增待辦事項，按 Enter 送出...">
+                                <button id="btn-add-todo" class="btn-primary">新增</button>
+                            </div>
+                            <div class="filter-bar" id="todo-filters" style="margin-bottom: 12px;">
+                                <button class="filter-btn" data-filter="all">全部待辦</button>
+                                <button class="filter-btn active" data-filter="pending">⏳ 待處理</button>
+                                <button class="filter-btn" data-filter="completed">✅ 已完成</button>
+                            </div>
+                            <ul class="todo-list" id="todo-list-container">
+                                <!-- 由 JS 動態生成 -->
+                                <li class="empty-msg">載入中...</li>
+                            </ul>
                         </div>
                     </div>
 
