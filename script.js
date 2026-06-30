@@ -143,6 +143,7 @@ function initEventListeners() {
 
     // 3. 同步按鈕與初始化試算表
     document.getElementById("btn-sync").addEventListener("click", () => {
+        if (document.activeElement) document.activeElement.blur(); // 強制目前編輯中的輸入框存檔
         syncData(true);
     });
 
@@ -264,6 +265,24 @@ function adjustDate(days) {
 async function syncData(showOverlay = false, silent = false) {
     if (showOverlay) showLoading("與雲端試算表同步中...");
 
+    // 智慧動態等待機制：防止手動同步與背景儲存並發時，雲端舊資料覆蓋本地新資料
+    const needsWait = (state.pendingWrites || 0) > 0 || (Date.now() - (state.lastEditTime || 0) < 3000);
+    if (needsWait) {
+        if (showOverlay) {
+            showLoading("正在自動儲存您的修改，請稍候...");
+        }
+        
+        // 每 500 毫秒偵測一次寫入進度，最多等待 6 秒（12 次）
+        let waitCount = 0;
+        while (((state.pendingWrites || 0) > 0 || (Date.now() - (state.lastEditTime || 0) < 3000)) && waitCount < 12) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            waitCount++;
+        }
+        
+        // 寫入完成後，額外多等 1.5 秒，確保 Google 試算表內部已將寫入完成提交
+        await new Promise(resolve => setTimeout(resolve, 1500));
+    }
+
     // 檢查是否設定了有效的 GAS 網址
     const isMockMode = !CONFIG || CONFIG.GAS_URL.includes("xxxxxxxxxxxx");
 
@@ -331,6 +350,10 @@ async function executeBackendAction(action, payload) {
         console.log(`[離線模式] 執行 ${action}:`, payload);
         return { status: "success" };
     }
+    
+    // 增加正在進行的背景寫入計數
+    state.pendingWrites = (state.pendingWrites || 0) + 1;
+    
     // 發送 POST 請求至後端
     try {
         const savedPassword = localStorage.getItem("suguanjia_password") || "";
@@ -355,6 +378,9 @@ async function executeBackendAction(action, payload) {
         console.error(`執行後端操作 ${action} 失敗:`, err);
         showToast("⚠️ 變更已存於本機，但未能成功同步至雲端試算表");
         return { status: "error", message: err.toString() };
+    } finally {
+        // 減少寫入計數
+        state.pendingWrites = Math.max(0, (state.pendingWrites || 0) - 1);
     }
 }
 
@@ -373,6 +399,7 @@ function loadLocalData() {
  * 儲存資料至 LocalStorage
  */
 function saveLocalData() {
+    state.lastEditTime = Date.now(); // 記錄最後修改時間戳記，供智慧同步判斷
     localStorage.setItem("mk_todos", JSON.stringify(state.todos));
     localStorage.setItem("mk_shuttle", JSON.stringify(state.shuttle));
     localStorage.setItem("mk_dailyChecklist", JSON.stringify(state.dailyChecklist));
@@ -495,7 +522,7 @@ function renderRoomTable() {
 
     // 確保當前日期的 FIXED_ROOMS 都有資料，若無則在前端初始化預設值
     FIXED_ROOMS.forEach(roomNo => {
-        let room = state.dailyChecklist.find(r => r.日期 === state.targetDate && r.房號 === roomNo);
+        let room = state.dailyChecklist.find(r => String(r.日期) === String(state.targetDate) && String(r.房號) === String(roomNo));
         if (!room) {
             room = {
                 ID: `room_${state.targetDate}_${roomNo}`,
@@ -516,7 +543,7 @@ function renderRoomTable() {
 
     // 依 FIXED_ROOMS 的固定順序渲染
     FIXED_ROOMS.forEach(roomNo => {
-        const room = state.dailyChecklist.find(r => r.日期 === state.targetDate && r.房號 === roomNo);
+        const room = state.dailyChecklist.find(r => String(r.日期) === String(state.targetDate) && String(r.房號) === String(roomNo));
         const tr = document.createElement("tr");
         const isChecked = room.是否確認 === "TRUE" || room.是否確認 === true;
 

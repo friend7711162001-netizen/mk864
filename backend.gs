@@ -226,17 +226,51 @@ function getSheetData(sheet, hasDateObj) {
   
   const headers = data[0];
   const rows = [];
-  const timeZone = Session.getScriptTimeZone();
+  // 使用試算表本體的時區，防止與 Script 預設時區不一致導致的日期時差偏移
+  const timeZone = sheet.getParent().getSpreadsheetTimeZone();
   
   for (let i = 1; i < data.length; i++) {
     const row = {};
     for (let j = 0; j < headers.length; j++) {
       let value = data[i][j];
       
-      // 處理 Date 物件以避免轉 JSON 時時區偏離，統一轉為 YYYY-MM-DD
-      if (value instanceof Date) {
-        // 如果是單純的日期，格式化為 YYYY-MM-DD，若是時間則保留
-        if (value.getHours() === 0 && value.getMinutes() === 0 && value.getSeconds() === 0) {
+      // 強制對「日期」欄位進行萬用格式化
+      if (headers[j] === "日期") {
+        let dateObj = null;
+        if (value instanceof Date) {
+          dateObj = value;
+        } else if (typeof value === 'number') {
+          // 處理 Google 試算表數值型日期序號 (46201 等)
+          dateObj = new Date((value - 25569) * 86400000);
+        } else if (typeof value === 'string' && value.trim() !== "") {
+          // 處理斜線或橫線字串型日期
+          dateObj = new Date(value.replace(/-/g, "/"));
+        }
+        
+        if (dateObj && !isNaN(dateObj.getTime())) {
+          value = Utilities.formatDate(dateObj, timeZone, "yyyy-MM-dd");
+        } else {
+          value = value ? value.toString() : "";
+        }
+      } else if (headers[j].indexOf("時間") !== -1) {
+        // 若欄位名稱包含「時間」關鍵字，不論是 Date 物件還是被污染的字串，皆強制提取並格式化為時分 HH:mm
+        if (value instanceof Date) {
+          value = Utilities.formatDate(value, timeZone, "HH:mm");
+        } else if (value !== null && value !== undefined) {
+          const valStr = value.toString().trim();
+          const timeMatch = valStr.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
+          if (timeMatch) {
+            const hours = timeMatch[1].padStart(2, '0');
+            const minutes = timeMatch[2];
+            value = hours + ":" + minutes;
+          } else {
+            value = valStr;
+          }
+        }
+      } else if (value instanceof Date) {
+        // 其他 Date 欄位，如果在試算表時區時分秒為 00:00:00，只保留日期部分
+        const timeStr = Utilities.formatDate(value, timeZone, "HH:mm:ss");
+        if (timeStr === "00:00:00") {
           value = Utilities.formatDate(value, timeZone, "yyyy-MM-dd");
         } else {
           value = Utilities.formatDate(value, timeZone, "yyyy-MM-dd HH:mm:ss");
@@ -305,11 +339,28 @@ function saveDailyTaskRow(rowData) {
   
   const data = sheet.getDataRange().getValues();
   let foundIndex = -1;
+  const timeZone = ss.getSpreadsheetTimeZone(); // 使用試算表時區，防止時差偏移
   
   // 比對日期與任務名稱
   for (let i = 1; i < data.length; i++) {
-    const rowDate = data[i][0] instanceof Date ? 
-      Utilities.formatDate(data[i][0], Session.getScriptTimeZone(), "yyyy-MM-dd") : data[i][0].toString();
+    let cellVal = data[i][0];
+    let rowDate = "";
+    
+    // 萬用解析試算表單元格日期
+    let dateObj = null;
+    if (cellVal instanceof Date) {
+      dateObj = cellVal;
+    } else if (typeof cellVal === 'number') {
+      dateObj = new Date((cellVal - 25569) * 86400000);
+    } else if (typeof cellVal === 'string' && cellVal.trim() !== "") {
+      dateObj = new Date(cellVal.replace(/-/g, "/"));
+    }
+    
+    if (dateObj && !isNaN(dateObj.getTime())) {
+      rowDate = Utilities.formatDate(dateObj, timeZone, "yyyy-MM-dd");
+    } else {
+      rowDate = cellVal ? cellVal.toString() : "";
+    }
     
     if (rowDate === rowData.日期 && data[i][1].toString() === rowData.任務名稱.toString()) {
       foundIndex = i + 1;
