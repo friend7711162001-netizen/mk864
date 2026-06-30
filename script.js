@@ -545,7 +545,7 @@ function renderRoomTable() {
             </td>
             <td>
                 <span class="tag-badge-btn ${room['清/不清'] === '清' ? 'tag-clean' : 'tag-dirty'}" 
-                    onclick="toggleRoomBadge('${room.ID}', '清/不清')">
+                    onclick="toggleRoomBadge('${room.ID}', '清/不清', this)">
                     ${room['清/不清'] || "不清"}
                 </span>
             </td>
@@ -556,13 +556,13 @@ function renderRoomTable() {
             </td>
             <td>
                 <span class="tag-badge-btn ${room.續退 === '續' ? 'tag-status-extend' : 'tag-status-checkout'}" 
-                    onclick="toggleRoomBadge('${room.ID}', '續退')">
+                    onclick="toggleRoomBadge('${room.ID}', '續退', this)">
                     ${room.續退 || "續"}
                 </span>
             </td>
             <td style="text-align: center;">
                 <input type="checkbox" class="todo-checkbox" ${isChecked ? 'checked' : ''} 
-                    onchange="toggleRoomChecked('${room.ID}', this.checked)">
+                    onchange="toggleRoomChecked('${room.ID}', this.checked, this)">
             </td>
             <td>
                 <input type="text" class="inline-input" style="width: 100%; min-width: 150px;" 
@@ -1016,15 +1016,22 @@ window.updateRoomField = function (id, field, value) {
 /**
  * 房況檢點：點擊徽章直接切換狀態並同步
  */
-window.toggleRoomBadge = function (id, field) {
+window.toggleRoomBadge = function (id, field, btnEl) {
     const room = state.dailyChecklist.find(r => r.ID === id);
     if (room) {
         if (field === '清/不清') {
             room['清/不清'] = room['清/不清'] === '清' ? '不清' : '清';
+            if (btnEl) {
+                btnEl.textContent = room['清/不清'];
+                btnEl.className = `tag-badge-btn ${room['清/不清'] === '清' ? 'tag-clean' : 'tag-dirty'}`;
+            }
         } else if (field === '續退') {
             room['續退'] = room['續退'] === '續' ? '退' : '續';
+            if (btnEl) {
+                btnEl.textContent = room.續退;
+                btnEl.className = `tag-badge-btn ${room.續退 === '續' ? 'tag-status-extend' : 'tag-status-checkout'}`;
+            }
         }
-        renderRoomTable();
         saveLocalData();
         executeBackendAction("saveDailyCheck", { data: room });
     }
@@ -1033,11 +1040,22 @@ window.toggleRoomBadge = function (id, field) {
 /**
  * 房況檢點：切換房況確認勾選
  */
-window.toggleRoomChecked = function (id, isChecked) {
+window.toggleRoomChecked = function (id, isChecked, chkEl) {
     const room = state.dailyChecklist.find(r => r.ID === id);
     if (room) {
         room.是否確認 = isChecked ? "TRUE" : "FALSE";
-        renderRoomTable();
+        if (chkEl) {
+            const tr = chkEl.closest("tr");
+            if (tr) {
+                if (isChecked) {
+                    tr.style.opacity = "0.85";
+                    tr.style.backgroundColor = "rgba(92, 163, 130, 0.03)";
+                } else {
+                    tr.style.opacity = "";
+                    tr.style.backgroundColor = "";
+                }
+            }
+        }
         saveLocalData();
         executeBackendAction("saveDailyCheck", { data: room });
     }
