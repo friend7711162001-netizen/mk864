@@ -350,10 +350,6 @@ async function executeBackendAction(action, payload) {
         if (result.status !== "success") {
             throw new Error(result.message);
         }
-        
-        // 存檔成功後，自動在背景無感同步最新數據，確保公式/其他裝置變更即時更新
-        syncData(false, true);
-        
         return result;
     } catch (err) {
         console.error(`執行後端操作 ${action} 失敗:`, err);
